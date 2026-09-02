@@ -36,6 +36,10 @@ Each product has one saved default selling price. When recording a sale, that pr
 ### Confirmed inventory unit behavior
 Inventory is tracked by whole pieces only in the current version. Product quantities are simple counts such as 1, 2, 3. No cartons, ml, grams, or unit conversions are needed now.
 
+### Confirmed inventory purchase funding
+Inventory purchases are normally paid from the owner's personal money. Adding purchased stock must not automatically reduce the main-vault balance.
+Whether these owner-funded purchases should be tracked as money owed back to the owner / owner capital is still pending.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -66,6 +70,7 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
+- When stock is paid from the owner's pocket, should it be tracked as owner capital / amount due back to owner?
 - Should stock purchases record supplier and invoice/notes?
 - Should internal-use inventory cost automatically feed daily operating expenses?
 - Should product-sale revenue be included in the main daily revenue number or shown separately then combined in total revenue?
