@@ -164,16 +164,21 @@ Status: Confirmed
 
 Do not add owner/staff user accounts or a normal login system in the first Supabase migration phase. Keep the user experience simple and postpone account-based authentication.
 
-This decision does NOT mean the Supabase database should be left publicly writable. A separate lightweight access-control method still needs to be chosen before exposing shared cloud data from the public GitHub Pages frontend.
+### D-028 — No visible access prompt in normal daily use
+Status: Superseded by D-029
 
-### D-028 — No visible access prompt, but do not expose public write access
+The earlier requirement was to have no visible PIN prompt at all. This has been refined: a PIN prompt is acceptable once when authorizing a new device, but should not appear during normal daily use afterward.
+
+### D-029 — Six-digit shop PIN for first-time device authorization
 Status: Confirmed
 
-The user does not want a visible login, PIN, or secret-link prompt in normal use.
+When a new or unrecognized device opens the shared Supabase-backed app, ask for one six-digit shop PIN. After successful authorization, remember that device so normal future use opens directly without a recurring login or PIN prompt.
 
-This is a user-experience requirement, not permission to make the production Supabase database publicly writable. A public GitHub Pages frontend cannot safely keep a server secret. The production Supabase migration must therefore remain blocked until a backend/device protection design is chosen that preserves the no-login experience without exposing unrestricted public writes.
-
-Do not put a Supabase service-role key or other server secret in frontend code.
+Security requirements:
+- PIN verification must happen in a protected backend/server-side path, not by comparing a secret embedded in the public GitHub Pages JavaScript.
+- Do not expose a Supabase service-role key, raw PIN, PIN hash, or any server secret in frontend code.
+- After successful PIN verification, the device should receive/store only a revocable device authorization credential suitable for normal use.
+- Supabase data must not be left unrestricted/publicly writable.
 
 ## Proposed / awaiting confirmation
 
@@ -181,5 +186,7 @@ Do not put a Supabase service-role key or other server secret in frontend code.
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
 ## Open decisions
-- Safe backend/device access method that requires no visible login/PIN during normal use.
+- How the initial six-digit shop PIN is created/set.
+- Whether one shared PIN is used for all new devices or PINs can vary by device.
+- Device revocation/reset flow if a phone or shop device is lost.
 - Migration path for any existing device-local data into Supabase.
