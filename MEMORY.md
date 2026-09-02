@@ -175,6 +175,11 @@ If the internet is unavailable, the app must continue accepting normal business 
 
 The UI should clearly indicate pending/offline changes until synchronization succeeds. Supabase remains the shared source of truth once queued changes are synchronized.
 
+### Confirmed same-record conflict rule
+If two authorized devices edit the same editable record while working from different states, use a simple last-write-wins rule: the most recently accepted update becomes the current value.
+
+Inventory movement history should still be retained for normal stock actions, but editable record conflicts do not require a manual conflict-resolution screen in this phase.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
