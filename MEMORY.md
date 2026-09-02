@@ -116,14 +116,13 @@ For sale:
 ## Important accounting principle
 Buying stock is a cash outflow but is not automatically the same as an operating expense for profit reporting. Inventory cost becomes an expense when the item is sold or consumed by the shop. We must keep cash movement and profit accounting separate.
 
-## Data / technical concern
-Product images and larger inventory history should not rely only on localStorage. Preferred next architecture is either:
-- local-first with IndexedDB for products/images/movements, or
-- cloud-backed storage/database (e.g. Supabase) for multi-device sync.
-Decision pending.
+## Confirmed deployment and data architecture for this version
+Keep the app deployed on GitHub Pages as it is now. Do not add Supabase or another cloud-sync backend in the current version.
+
+The website can be opened from multiple devices, but each device keeps its own local data. Changes made on one device do not automatically appear on another device in this version.
 
 ## Open questions
-- Local-only vs multi-device cloud sync now?
+- None for the initial inventory scope currently under discussion.
 
 ## Rule for future changes
 Whenever a business/accounting decision is agreed, update MEMORY.md and docs/DECISIONS.md before or with the implementation commit.
