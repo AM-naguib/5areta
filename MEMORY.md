@@ -190,14 +190,22 @@ Store product images in Supabase Storage so the same product image is available 
 
 ## Supabase migration implementation status
 
-Backend scaffolding has been added to the repository:
-- `supabase/schema.sql`: tables, RLS, authorized-device checks, and private product-image bucket policies.
-- `supabase/functions/verify-device/index.ts`: one-time 6-digit device PIN verification with per-session attempt limiting.
-- `docs/SUPABASE_SETUP.md`: exact one-time Supabase Dashboard setup steps.
+Supabase is now connected and the cloud backend is deployed.
 
-The actual production database is not active yet. Before wiring the live GitHub Pages frontend to Supabase, the Supabase project owner must enable anonymous sign-ins, run the schema SQL, configure `SHOP_PIN` as a Supabase Function secret, and deploy the `verify-device` Edge Function.
-
-The chosen PIN value itself must never be committed to this repository.
+Implemented:
+- Shared Supabase tables for daily finance, vault withdrawals, products, inventory movements, app settings, and migration metadata.
+- RLS protection based on approved anonymous-device sessions.
+- One-time 6-digit device approval through the `verify-device` Edge Function.
+- The shop access code is stored as a bcrypt hash in a protected database table; the plaintext code is not committed to GitHub.
+- Private Supabase Storage bucket for product images.
+- Browser cloud client in `cloud.js`.
+- Automatic first-device migration from legacy localStorage to Supabase, with verification before deleting the old local dataset.
+- Small local pending/base snapshots for offline write recovery; Supabase remains the primary shared source of truth.
+- Background cloud refresh and automatic sync when connectivity returns.
+- Product images are uploaded to Supabase Storage and rendered with signed URLs.
+- GitHub Pages deployment updated to load the Supabase client and cloud layer.
+- JavaScript syntax validation completed for app.js, inventory.js, cloud.js, and service-worker.js.
+- Latest GitHub Pages workflow completed successfully.
 
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
