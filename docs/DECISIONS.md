@@ -219,6 +219,13 @@ When two authorized devices edit the same editable record from different states,
 
 Do not add a manual conflict-resolution prompt in this phase. Normal inventory movements should still retain their movement history.
 
+### D-034 — Background-only synchronization UI
+Status: Confirmed
+
+Run synchronization automatically in the background. Do not show a persistent synchronized/synchronizing/offline status indicator and do not add a manual sync button in the normal interface in this phase.
+
+Actual errors that require user action should still be surfaced clearly so data loss is not silent.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
