@@ -159,11 +159,18 @@ Target architecture:
 - Data should synchronize across the owner's phone and the shop device instead of being isolated per browser/device.
 - The current local-storage implementation remains temporary until the Supabase migration is implemented and verified.
 
+### D-027 — No user-account login in the first Supabase phase
+Status: Confirmed
+
+Do not add owner/staff user accounts or a normal login system in the first Supabase migration phase. Keep the user experience simple and postpone account-based authentication.
+
+This decision does NOT mean the Supabase database should be left publicly writable. A separate lightweight access-control method still needs to be chosen before exposing shared cloud data from the public GitHub Pages frontend.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
 ## Open decisions
-- Supabase authentication and user-role model (owner only vs owner/staff accounts).
+- Lightweight access control for Supabase without normal user accounts/login.
 - Migration path for any existing device-local data into Supabase.
