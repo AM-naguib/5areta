@@ -28,7 +28,10 @@ Each product should support:
 - Product image.
 - Quantity in stock.
 - Purchase cost.
-- Possibly a default selling price (decision pending).
+- A saved default selling price.
+
+### Confirmed selling-price behavior
+Each product has one saved default selling price. When recording a sale, that price appears automatically, but it can be edited for that individual sale before saving.
 
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
@@ -60,7 +63,6 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Do products have one selling price or can sale price change each time?
 - Should units be pieces only, or support bottles/boxes/ml/etc.?
 - Should stock purchases record supplier and invoice/notes?
 - Should internal-use inventory cost automatically feed daily operating expenses?
