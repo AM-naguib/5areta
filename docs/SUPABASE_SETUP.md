@@ -4,23 +4,31 @@ The production Supabase project is connected and configured.
 
 ## Current architecture
 - GitHub Pages hosts the frontend/PWA.
-- Supabase Auth creates a persistent anonymous session per browser/device.
-- A new device enters the shop's 6-digit code once.
-- The `verify-device` Edge Function validates the code server-side and records the anonymous user in `authorized_devices`.
-- RLS allows business-data access only when `is_authorized_device()` is true.
-- The shop code is stored only as a bcrypt hash in the protected `shop_access_config` table.
+- Supabase Auth keeps a persistent anonymous session per browser/device.
+- There is no shop PIN or visible login prompt in normal use.
+- RLS allows business-data access only for sessions already present in `authorized_devices`.
+- A genuinely new browser/device is not automatically approved; approve it manually in Supabase if needed later.
 - Supabase Database stores structured shop data.
 - Supabase Storage bucket `product-images` stores product images privately.
-- `cloud.js` handles migration, background sync, offline queueing, and signed image URLs.
+- `cloud.js` performs simple background synchronization and signed image loading.
+- localStorage is kept as an immediate device cache/offline working copy. There is no one-time migration gate.
 
 ## Important security rules
 - Never commit a service-role/secret key to GitHub.
 - The browser contains only the public Project URL and publishable key.
-- Do not store the plaintext shop code in repository files.
-- `device_pin_attempts` and `shop_access_config` intentionally have RLS enabled with no client policies; only trusted server-side code accesses them.
+- Do not make the business tables publicly writable.
+- Do not auto-authorize arbitrary anonymous sessions.
+
+## Removed legacy mechanisms
+The earlier six-digit shop-code system has been removed:
+- `device_pin_attempts` removed.
+- `shop_access_config` removed.
+- `verify_shop_pin(text)` removed.
+- The deployed `verify-device` Edge Function has been replaced with a disabled response and is no longer called by the frontend.
+- The previous automatic localStorage migration/verification flow has been removed.
 
 ## Deployment
-The production backend and Edge Function are already deployed to project:
+Production project:
 `rsabmbljhjsfvadhrsti`
 
-Anonymous Sign-Ins are enabled in Supabase Auth.
+Anonymous Sign-Ins remain enabled so a new browser can obtain a session, but access to business data still requires manual inclusion in `authorized_devices`.
