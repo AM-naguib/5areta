@@ -47,7 +47,14 @@ Inventory can leave stock for exactly two main reasons:
 2. Customer sale.
 
 ### Confirmed internal-use recording
-When stock is used by the shop, deduct the quantity and record its inventory cost in a separate business category named "استهلاك منتجات". This category must remain separate from ordinary operating expenses. We still need to confirm whether it directly reduces the main shop-profit figure or is shown only as a separate reporting line.
+When stock is used by the shop, deduct the quantity and record its inventory cost in a separate business category named "استهلاك منتجات". This category stays separate from ordinary operating expenses.
+
+### Confirmed profit display with product consumption
+The app should show two profit figures:
+- Shop profit before product consumption = service revenue - ordinary operating expenses - worker payments.
+- Shop profit after product consumption = shop profit before product consumption - product-consumption inventory cost.
+
+This lets the owner see ordinary shop performance separately from the more complete profit after creams/oils/products used internally.
 
 For sale:
 - Quantity is deducted from stock.
@@ -70,7 +77,6 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Should product-consumption cost reduce the main shop-profit figure or only appear as a separate metric?
 - Should stock purchases record supplier and invoice/notes?
 - Should product-sale revenue be included in the main daily revenue number or shown separately then combined in total revenue?
 - Do we need low-stock alerts / minimum stock levels?
