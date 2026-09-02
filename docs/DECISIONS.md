@@ -41,26 +41,30 @@ Status: Confirmed
 
 Inventory purchases are paid from the owner's personal money by default. Purchasing stock must not automatically reduce the main-vault balance.
 
+### D-008 — Owner-funded purchase tracking
+Status: Confirmed
+
+Do not track owner-funded stock purchases as money owed back to the owner or as owner capital. Record only the inventory purchase, quantity, and inventory cost. No separate owner receivable/capital balance is maintained for these purchases.
+
 ## Proposed / awaiting confirmation
 
-### D-008 — Costing method
+### D-009 — Costing method
 Proposal: Weighted average cost.
 Reason: simple, understandable, and appropriate for repeated purchases at changing prices.
 
-### D-009 — Accounting for purchases
-Proposal: Stock purchase increases inventory and records owner-funded cash outlay, but it should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
+### D-010 — Accounting for purchases
+Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
-### D-010 — Internal shop consumption
+### D-011 — Internal shop consumption
 Proposal: Internal-use stock creates an operating cost automatically based on inventory cost. Avoid entering the same amount manually as an operating expense.
 
-### D-011 — Product sales revenue
+### D-012 — Product sales revenue
 Proposal: Show service revenue and product revenue separately, plus combined total business revenue.
 
-### D-012 — Storage architecture
+### D-013 — Storage architecture
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Whether owner-funded stock purchases should be tracked as owner capital/amount due back to owner.
 - Supplier/invoice fields.
 - Low stock threshold and alerts.
 - Returns, damage/loss, manual stock adjustment.
