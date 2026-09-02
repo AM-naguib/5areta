@@ -46,6 +46,13 @@ Status: Confirmed
 
 Do not track owner-funded stock purchases as money owed back to the owner or as owner capital. Record only the inventory purchase, quantity, and inventory cost. No separate owner receivable/capital balance is maintained for these purchases.
 
+### D-009 — Inventory costing uses latest purchase price
+Status: Confirmed
+
+Use the latest purchase price as the current inventory unit cost for the product. Do not use weighted-average costing and do not keep cost layers by purchase batch.
+
+Example: if the product previously cost 100 and the newest purchase costs 120, the current unit cost becomes 120 for subsequent product-sale profit and internal-consumption calculations.
+
 ### D-011 — Internal inventory consumption category
 Status: Confirmed
 
@@ -80,10 +87,6 @@ The product-sales area must show and retain two separate figures:
 Do not collapse these into one number.
 
 ## Proposed / awaiting confirmation
-
-### D-009 — Costing method
-Proposal: Weighted average cost.
-Reason: simple, understandable, and appropriate for repeated purchases at changing prices.
 
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
