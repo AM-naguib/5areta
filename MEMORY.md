@@ -131,7 +131,9 @@ Target architecture:
 ### Confirmed first-phase access experience
 Do not add normal user accounts or an owner/staff login system in the first Supabase migration phase. The app should stay simple to open and use.
 
-This does not mean the public GitHub Pages frontend can safely use a fully open Supabase database. We still need to choose a lightweight access-control method before cloud data goes live. Do not expose a Supabase service-role key or any other server secret in the frontend.
+The user also does not want a visible PIN or secret-link prompt in normal use. This is a UX requirement only. It does not authorize an unrestricted public-write database.
+
+The production Supabase migration must not expose a service-role key or any server secret in the GitHub Pages frontend. Because a public static frontend cannot keep such a secret, cloud write access must stay blocked until a safe backend/device access mechanism is chosen that keeps normal use login-free without making the database publicly writable.
 
 ## Inventory V1 implementation status
 Inventory V1 is currently deployed on GitHub Pages and works with browser-local storage. This is now considered the temporary implementation before the Supabase migration.
@@ -155,7 +157,7 @@ Implemented in the current live version:
 Live app: https://am-naguib.github.io/5areta/
 
 ## Open questions
-- Lightweight access control for Supabase without normal user accounts/login.
+- Safe backend/device access method that requires no visible login/PIN during normal use.
 - How to migrate any existing local data into Supabase when the migration goes live.
 
 ## Rule for future changes
