@@ -143,11 +143,21 @@ Each product card should keep the main daily actions visible for fast use:
 Tapping the product card itself opens a product-details screen. The details screen should show the product image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
 
 ### D-025 — Keep GitHub Pages and device-local data for now
+Status: Superseded by D-026
+
+This was the previous decision. It is no longer the target architecture.
+
+### D-026 — GitHub Pages frontend with Supabase shared storage
 Status: Confirmed
 
-Keep the current deployment model on GitHub Pages. Do not add Supabase or another cloud-sync backend in the current version.
+Keep the website deployed on GitHub Pages, but move persistent business data to Supabase so all authorized devices use the same data.
 
-The website can be opened from different devices, but each device keeps its own local app data. Changes made on one device are not automatically synchronized to another device in this version.
+Target architecture:
+- GitHub Pages hosts the frontend application.
+- Supabase Database stores shop days, vault movements, products, inventory movements, prices, and other structured business data.
+- Supabase Storage stores product images.
+- Data should synchronize across the owner's phone and the shop device instead of being isolated per browser/device.
+- The current local-storage implementation remains temporary until the Supabase migration is implemented and verified.
 
 ## Proposed / awaiting confirmation
 
@@ -155,4 +165,5 @@ The website can be opened from different devices, but each device keeps its own 
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
 ## Open decisions
-- None for the initial inventory scope currently under discussion.
+- Supabase authentication and user-role model (owner only vs owner/staff accounts).
+- Migration path for any existing device-local data into Supabase.
