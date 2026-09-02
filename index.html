@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
-  <meta name="description" content="نظام بسيط لإدارة إيراد المحل والمصاريف والخزنة" />
+  <meta name="description" content="نظام بسيط لإدارة إيراد المحل والمصاريف والخزنة والمخزن والمنتجات" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
@@ -37,9 +37,14 @@
 
         <div class="stats-grid">
           <article class="stat-card hero-stat">
-            <span class="stat-label">ربح المحل</span>
+            <span class="stat-label">ربح المحل قبل المنتجات</span>
             <strong id="statProfit">0 ج.م</strong>
             <small>الإيراد − التشغيل − الصنايعي</small>
+          </article>
+          <article class="stat-card after-product-stat">
+            <span class="stat-label">الربح بعد استهلاك المنتجات</span>
+            <strong id="statProfitAfterProducts">0 ج.م</strong>
+            <small>ربح المحل − استهلاك المنتجات</small>
           </article>
           <article class="stat-card">
             <span class="stat-label">الإيراد</span>
@@ -121,12 +126,13 @@
           <div class="panel-head">
             <div>
               <p class="section-kicker">تفاصيل الشهر</p>
-              <h3>الفلوس خرجت فين؟</h3>
+              <h3>الفلوس والتكلفة راحت فين؟</h3>
             </div>
           </div>
           <div class="breakdown-list">
             <div><span>تشغيل المحل</span><strong id="breakOperating">0 ج.م</strong></div>
             <div><span>الصنايعي</span><strong id="breakWorker">0 ج.م</strong></div>
+            <div><span>استهلاك منتجات</span><strong id="breakProductConsumption">0 ج.م</strong></div>
             <div><span>سحب شخصي من دخل الأيام</span><strong id="breakPersonal">0 ج.م</strong></div>
             <div><span>سحب من الخزنة الرئيسية</span><strong id="breakVaultWithdrawals">0 ج.م</strong></div>
             <div class="emphasis"><span>صافي الداخل للخزنة</span><strong id="breakNet">0 ج.م</strong></div>
@@ -143,6 +149,47 @@
           <button class="btn ghost" id="exportCsvBtn">تصدير CSV</button>
         </div>
         <div id="recordsList" class="records-list"></div>
+      </section>
+
+      <section class="view" data-view="inventory">
+        <div class="section-head inventory-head">
+          <div>
+            <p class="section-kicker">المخزن والمنتجات</p>
+            <h2>المنتجات</h2>
+          </div>
+          <button class="btn primary" id="addProductBtn">+ منتج جديد</button>
+        </div>
+
+        <div class="inventory-stats">
+          <article class="inventory-stat">
+            <span>عدد المنتجات</span>
+            <strong id="inventoryProductsCount">0</strong>
+          </article>
+          <article class="inventory-stat">
+            <span>القطع في المخزن</span>
+            <strong id="inventoryUnitsCount">0</strong>
+          </article>
+          <article class="inventory-stat">
+            <span>كاش مبيعات المنتجات</span>
+            <strong id="inventorySalesCash">0 ج.م</strong>
+          </article>
+          <article class="inventory-stat">
+            <span>ربح المنتجات</span>
+            <strong id="inventorySalesProfit">0 ج.م</strong>
+          </article>
+        </div>
+
+        <div id="lowStockAlert" class="low-stock-alert" hidden></div>
+
+        <section class="panel inventory-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">المخزون الحالي</p>
+              <h3>اختار المنتج واعمل الحركة بسرعة</h3>
+            </div>
+          </div>
+          <div id="productsGrid" class="products-grid"></div>
+        </section>
       </section>
 
       <section class="view" data-view="vault">
@@ -232,7 +279,7 @@
             <button class="btn secondary" id="exportBackupBtn">تنزيل Backup</button>
             <label class="btn ghost file-btn">استيراد Backup<input type="file" id="importBackupInput" accept="application/json,.json" hidden /></label>
           </div>
-          <p class="helper">حاليًا البيانات محفوظة على نفس الجهاز. استخدم الـ Backup قبل تغيير الموبايل أو مسح المتصفح.</p>
+          <p class="helper">حاليًا البيانات محفوظة على نفس الجهاز، بما فيها المنتجات وصورها. استخدم الـ Backup قبل تغيير الموبايل أو مسح المتصفح.</p>
         </section>
 
         <section class="panel danger-panel">
@@ -278,6 +325,10 @@
         <svg viewBox="0 0 24 24"><path d="M5 5h14M5 12h14M5 19h14"/></svg>
         <span>السجل</span>
       </button>
+      <button class="nav-item" data-target="inventory">
+        <svg viewBox="0 0 24 24"><path d="M4 8.5 12 4l8 4.5v8L12 21l-8-4.5v-8ZM4 8.5l8 4.5 8-4.5M12 13v8"/></svg>
+        <span>المخزن</span>
+      </button>
       <button class="nav-item" data-target="vault">
         <svg viewBox="0 0 24 24"><path d="M4 7h16v11H4V7Zm2-3h12v3H6V4Zm9 8h3"/></svg>
         <span>الخزنة</span>
@@ -290,6 +341,21 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="product-sheet" id="productSheet" hidden>
+    <button class="sheet-backdrop" data-product-sheet-close aria-label="إغلاق"></button>
+    <div class="product-sheet-card">
+      <div class="product-sheet-head">
+        <div>
+          <p class="section-kicker" id="productSheetKicker">المخزن</p>
+          <h3 id="productSheetTitle">المنتج</h3>
+        </div>
+        <button class="sheet-close-btn" type="button" data-product-sheet-close aria-label="إغلاق">×</button>
+      </div>
+      <div id="productSheetBody" class="product-sheet-body"></div>
+    </div>
+  </div>
+
   <div class="confirm-sheet" id="confirmSheet" hidden>
     <button class="sheet-backdrop" data-confirm="cancel" aria-label="إغلاق"></button>
     <div class="sheet-card">
@@ -303,5 +369,6 @@
   </div>
 
   <script src="./app.js" defer></script>
+  <script src="./inventory.js" defer></script>
 </body>
 </html>
