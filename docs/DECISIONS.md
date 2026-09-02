@@ -49,7 +49,16 @@ Do not track owner-funded stock purchases as money owed back to the owner or as 
 ### D-011 — Internal inventory consumption category
 Status: Confirmed
 
-When a product is taken from inventory for use in the shop, deduct its quantity and record its inventory cost under a separate business category named "استهلاك منتجات" (product consumption). Do not merge this amount into ordinary operating expenses. Whether this category is included directly in the main shop-profit formula is a separate decision to confirm.
+When a product is taken from inventory for use in the shop, deduct its quantity and record its inventory cost under a separate business category named "استهلاك منتجات" (product consumption). Do not merge this amount into ordinary operating expenses.
+
+### D-014 — Two-level shop profit reporting
+Status: Confirmed
+
+Show two shop-profit figures:
+1. Shop profit before product consumption = service revenue - ordinary operating expenses - worker payments.
+2. Shop profit after product consumption = shop profit before product consumption - inventory product-consumption cost.
+
+This keeps ordinary operating performance visible while also showing the more complete profit after internal product use.
 
 ## Proposed / awaiting confirmation
 
@@ -67,7 +76,6 @@ Proposal: Show service revenue and product revenue separately, plus combined tot
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Whether product-consumption cost reduces the main shop-profit figure or is shown only as a separate reporting metric.
 - Supplier/invoice fields.
 - Low stock threshold and alerts.
 - Returns, damage/loss, manual stock adjustment.
