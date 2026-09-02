@@ -1,6 +1,6 @@
 # 5areta — Project Memory
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Purpose
 5areta is a simple Arabic RTL, mobile-first shop management app for a barbershop. It should stay easy enough to use daily from a phone, while being structured so it can later run on a shop device and support cloud sync.
@@ -66,6 +66,15 @@ An existing product must have a direct "Add stock" / restock action. The user ca
 
 ### Confirmed low-stock behavior
 Use one shared low-stock threshold for all products. When any product reaches 3 pieces or fewer, show a low-stock warning.
+
+### Confirmed product-card interaction
+Product cards should keep the main daily actions visible for speed:
+- Sell.
+- Internal use / shop operation.
+- Add stock.
+- Edit selling price.
+
+Tapping the product card itself opens the product-details screen. That screen should show the image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
 
 ### Confirmed stock-adjustment scope
 Do not include damaged/lost stock actions or manual quantity adjustments in the current version. Inventory changes should come only from:
