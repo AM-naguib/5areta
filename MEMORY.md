@@ -129,11 +129,15 @@ Target architecture:
 - The current localStorage implementation is temporary until migration is completed and verified.
 
 ### Confirmed first-phase access experience
-Do not add normal user accounts or an owner/staff login system in the first Supabase migration phase. The app should stay simple to open and use.
+Do not add normal owner/staff user accounts or a recurring login screen in the first Supabase migration phase.
 
-The user also does not want a visible PIN or secret-link prompt in normal use. This is a UX requirement only. It does not authorize an unrestricted public-write database.
+A new or unrecognized device asks once for a six-digit shop PIN. After the PIN is accepted, that device is remembered and normal future use opens directly without asking for the PIN every time.
 
-The production Supabase migration must not expose a service-role key or any server secret in the GitHub Pages frontend. Because a public static frontend cannot keep such a secret, cloud write access must stay blocked until a safe backend/device access mechanism is chosen that keeps normal use login-free without making the database publicly writable.
+Security constraints:
+- PIN verification happens through a protected backend/server-side path, not by embedding or comparing the secret in GitHub Pages JavaScript.
+- Do not expose a Supabase service-role key, raw PIN, PIN hash, or any server secret in frontend code.
+- The authorized device stores only a revocable device credential, not a server secret.
+- Supabase data must not be unrestricted/publicly writable.
 
 ## Inventory V1 implementation status
 Inventory V1 is currently deployed on GitHub Pages and works with browser-local storage. This is now considered the temporary implementation before the Supabase migration.
@@ -157,7 +161,9 @@ Implemented in the current live version:
 Live app: https://am-naguib.github.io/5areta/
 
 ## Open questions
-- Safe backend/device access method that requires no visible login/PIN during normal use.
+- How the initial six-digit shop PIN is created/set.
+- Whether one shared PIN is used for all new devices or PINs can vary by device.
+- Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
 
 ## Rule for future changes
