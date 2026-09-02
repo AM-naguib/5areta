@@ -131,7 +131,7 @@ Target architecture:
 ### Confirmed first-phase access experience
 Do not add normal owner/staff user accounts or a recurring login screen in the first Supabase migration phase.
 
-A new or unrecognized device asks once for a six-digit shop PIN. After the PIN is accepted, that device is remembered and normal future use opens directly without asking for the PIN every time.
+A new or unrecognized device asks once for a six-digit shop PIN. The owner chooses one fixed six-digit PIN for the shop, and that same PIN is used to authorize any new device. After the PIN is accepted, that device is remembered and normal future use opens directly without asking for the PIN every time.
 
 Security constraints:
 - PIN verification happens through a protected backend/server-side path, not by embedding or comparing the secret in GitHub Pages JavaScript.
@@ -161,8 +161,6 @@ Implemented in the current live version:
 Live app: https://am-naguib.github.io/5areta/
 
 ## Open questions
-- How the initial six-digit shop PIN is created/set.
-- Whether one shared PIN is used for all new devices or PINs can vary by device.
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
 
