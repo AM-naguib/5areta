@@ -35,6 +35,11 @@ Each product has one saved default selling price. When recording a sale, that pr
 
 Changing a product's purchase price during restocking must not automatically change its saved default selling price. The selling price stays as-is until the user edits it manually.
 
+The saved default selling price can be edited from two places:
+- A quick "Edit price" action directly on the product card.
+- The full product edit screen, which also allows editing the product name and image.
+Both update the same saved default selling price.
+
 ### Confirmed inventory unit behavior
 Inventory is tracked by whole pieces only in the current version. Product quantities are simple counts such as 1, 2, 3. No cartons, ml, grams, or unit conversions are needed now.
 
