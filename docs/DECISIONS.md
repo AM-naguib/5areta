@@ -226,6 +226,13 @@ Run synchronization automatically in the background. Do not show a persistent sy
 
 Actual errors that require user action should still be surfaced clearly so data loss is not silent.
 
+### D-035 — Store product images in Supabase Storage
+Status: Confirmed
+
+Product images must be uploaded to Supabase Storage and referenced by the shared product data so images are available across authorized devices.
+
+Do not keep product images device-local as the primary production storage after the Supabase migration.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
