@@ -122,6 +122,15 @@ Status: Confirmed
 
 Changing the purchase price while adding stock must not automatically change the product's saved default selling price. The saved selling price stays unchanged until the user edits it manually.
 
+### D-023 — Selling price can be edited from two places
+Status: Confirmed
+
+The saved default selling price can be changed in two ways:
+- A quick "Edit price" action directly from the product card.
+- The full product edit screen, where the user can also edit the product name and image.
+
+Both actions update the same saved default selling price.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
