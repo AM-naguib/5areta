@@ -212,6 +212,13 @@ If internet connectivity is unavailable, do not block normal shop work. Save new
 
 The app should visibly indicate that changes are pending synchronization and clear that state only after Supabase confirms the writes.
 
+### D-033 — Last-write-wins for same-record conflicts
+Status: Confirmed
+
+When two authorized devices edit the same editable record from different states, use last-write-wins. The most recently accepted update becomes the current value.
+
+Do not add a manual conflict-resolution prompt in this phase. Normal inventory movements should still retain their movement history.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
