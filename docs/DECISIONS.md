@@ -26,26 +26,30 @@ Status: Confirmed
 
 Every stock addition or deduction must be logged rather than only overwriting the current quantity.
 
+### D-005 — Default selling price per product
+Status: Confirmed
+
+Each product has a saved default selling price. When recording a sale, that price is prefilled automatically, but the user can edit it for that specific sale before saving.
+
 ## Proposed / awaiting confirmation
 
-### D-005 — Costing method
+### D-006 — Costing method
 Proposal: Weighted average cost.
 Reason: simple, understandable, and appropriate for repeated purchases at changing prices.
 
-### D-006 — Accounting for purchases
+### D-007 — Accounting for purchases
 Proposal: Stock purchase is recorded as inventory/cash movement. It should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
-### D-007 — Internal shop consumption
+### D-008 — Internal shop consumption
 Proposal: Internal-use stock creates an operating cost automatically based on inventory cost. Avoid entering the same amount manually as an operating expense.
 
-### D-008 — Product sales revenue
+### D-009 — Product sales revenue
 Proposal: Show service revenue and product revenue separately, plus combined total business revenue.
 
-### D-009 — Storage architecture
+### D-010 — Storage architecture
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Default selling price vs price entered on each sale.
 - Product units and packaging model.
 - Supplier/invoice fields.
 - Low stock threshold and alerts.
