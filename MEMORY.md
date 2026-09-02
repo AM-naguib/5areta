@@ -170,6 +170,11 @@ After the automatic local-to-Supabase migration has completed and the migrated d
 
 The app should then use Supabase as the only primary source of truth. Do not keep the old local dataset as a parallel live copy that can diverge.
 
+### Confirmed offline-first behavior
+If the internet is unavailable, the app must continue accepting normal business entries locally instead of blocking work. Queue unsynced changes on the device and automatically synchronize them to Supabase when connectivity returns.
+
+The UI should clearly indicate pending/offline changes until synchronization succeeds. Supabase remains the shared source of truth once queued changes are synchronized.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
