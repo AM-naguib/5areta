@@ -46,6 +46,14 @@ Do not track these owner-funded stock purchases as money owed back to the owner 
 Use the latest purchase price as the current unit cost for each product. Do not use weighted-average costing and do not keep separate purchase-batch cost layers.
 Example: if a product previously cost 100 and the newest purchase costs 120, its current cost becomes 120 for later sale-profit and internal-consumption calculations.
 
+### Confirmed purchase-entry fields
+When adding purchased stock, keep the entry simple and record only:
+- Product.
+- Quantity.
+- Purchase unit price.
+- Purchase date.
+Do not require supplier name, invoice number, or invoice notes in the current version.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -87,7 +95,6 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Should stock purchases record supplier and invoice/notes?
 - Do we need low-stock alerts / minimum stock levels?
 - Do we need returns, damaged/lost stock, and manual adjustment from version 1?
 - Local-only vs multi-device cloud sync now?
