@@ -160,6 +160,11 @@ Implemented in the current live version:
 
 Live app: https://am-naguib.github.io/5areta/
 
+### Confirmed migration of existing local data
+When Supabase goes live, automatically migrate the existing browser-local app data into Supabase on first successful setup. Do not require the owner to re-enter the existing records manually.
+
+After migration is verified, Supabase becomes the primary source of truth for shared business data. Local data may remain only as a temporary fallback/cache during migration and should not continue as an independent competing data source.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
