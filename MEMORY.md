@@ -3,7 +3,7 @@
 Last updated: 2026-09-03
 
 ## Purpose
-5areta is a simple Arabic RTL, mobile-first shop management app for a barbershop. It should stay easy enough to use daily from a phone, while being structured so it can later run on a shop device and support cloud sync.
+5areta is a simple Arabic RTL, mobile-first shop management app for a barbershop. It should stay easy enough to use daily from a phone, while being structured so it can run on a shop device and share the same live business data.
 
 ## Existing financial model
 - Shop profit = service revenue - operating expenses - worker payments.
@@ -18,7 +18,7 @@ Last updated: 2026-09-03
 - Very fast daily entry.
 - Clear separation between profit, personal withdrawals, and vault movement.
 - PWA / installable web app.
-- Current version is local-first and can be backed up/restored.
+- GitHub Pages remains the frontend deployment.
 
 ## Inventory requirements and confirmed behavior
 The app includes inventory for creams, oils, and similar products.
@@ -116,18 +116,25 @@ For sale:
 ## Important accounting principle
 Buying stock is a cash outflow but is not automatically the same as an operating expense for profit reporting. Inventory cost becomes an expense when the item is sold or consumed by the shop. We must keep cash movement and profit accounting separate.
 
-## Confirmed deployment and data architecture for this version
-Keep the app deployed on GitHub Pages as it is now. Do not add Supabase or another cloud-sync backend in the current version.
+## Confirmed deployment and data architecture
+GitHub Pages remains the frontend host, but device-local storage is no longer the target long-term data architecture.
 
-The website can be opened from multiple devices, but each device keeps its own local data. Changes made on one device do not automatically appear on another device in this version.
+Use Supabase for shared persistent data so the owner's phone and the shop device see the same business state.
+
+Target architecture:
+- GitHub Pages: frontend/PWA only.
+- Supabase Database: days, vault withdrawals, products, inventory movements, purchase/sale values, and other structured business records.
+- Supabase Storage: product images.
+- Authorized devices read and write the same Supabase data.
+- The current localStorage implementation is temporary until migration is completed and verified.
 
 ## Inventory V1 implementation status
-Inventory V1 was implemented and deployed to the existing GitHub Pages app on 2026-09-03.
+Inventory V1 is currently deployed on GitHub Pages and works with browser-local storage. This is now considered the temporary implementation before the Supabase migration.
 
-Implemented now:
+Implemented in the current live version:
 - A new "المخزن" tab in the main navigation.
 - Add a product with name, image, starting quantity, purchase price, saved selling price, and purchase date.
-- Product images are compressed in the browser before being stored with the device-local app data.
+- Product images are compressed in the browser before local storage.
 - Restock an existing product with a new quantity, editable new purchase price, and date.
 - The newest restock price becomes the product's current/latest purchase cost; the saved selling price stays unchanged.
 - Record customer product sales with editable sale price, inventory cost, revenue, and gross product profit.
@@ -138,13 +145,13 @@ Implemented now:
 - Product cards with quick Sell / Internal use / Add stock / Edit price actions.
 - Product detail view with complete purchase, sale, and consumption movement history.
 - Quick selling-price edit plus full product edit for name, image, and selling price.
-- Backup/restore now carries product and inventory data as part of the same local backup.
-- PWA cache version updated so the inventory release is included in offline assets.
+- Backup/restore carries product and inventory data.
 
 Live app: https://am-naguib.github.io/5areta/
 
 ## Open questions
-- None for the initial inventory scope currently implemented. Future changes can be decided after real use.
+- Supabase authentication model: owner-only login or separate owner/staff accounts.
+- How to migrate any existing local data into Supabase when the migration goes live.
 
 ## Rule for future changes
 Whenever a business/accounting decision is agreed, update MEMORY.md and docs/DECISIONS.md before or with the implementation commit.
