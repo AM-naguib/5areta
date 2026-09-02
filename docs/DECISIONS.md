@@ -189,6 +189,15 @@ The PIN is entered only during first-time device authorization. After a device i
 
 The PIN itself must not be stored in the public GitHub Pages source or exposed to frontend JavaScript as a server secret.
 
+### D-030 — Automatically migrate existing local data to Supabase
+Status: Confirmed
+
+On the first successful Supabase setup, automatically migrate all existing 5areta browser-local business data into Supabase rather than starting from an empty cloud database.
+
+The migration should include the existing supported records such as daily finance data, vault withdrawals, products, inventory movements, prices, and product images where technically possible.
+
+After the migration is verified, Supabase becomes the primary shared data source. Avoid leaving localStorage and Supabase as two independent sources of truth.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
