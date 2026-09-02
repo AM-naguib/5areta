@@ -58,11 +58,10 @@ function loadState() {
 }
 
 function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   if (window.__5ARETA_CLOUD_ACTIVE__ && typeof window.cloudSaveState === 'function') {
     window.cloudSaveState(state);
-    return;
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function dayMetrics(day) {
@@ -226,6 +225,8 @@ function showToast(message) {
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
 }
+
+window.showToast = showToast;
 
 function confirmAction(title, text) {
   return new Promise((resolve) => {
@@ -444,7 +445,7 @@ function downloadBlob(blob, filename) {
 }
 
 $('resetDataBtn').addEventListener('click', async () => {
-  const ok = await confirmAction('مسح كل البيانات؟', 'الإجراء ده هيمسح الأيام والخزنة والمنتجات وحركات المخزن من الجهاز. نزّل Backup الأول لو محتاجها.');
+  const ok = await confirmAction('مسح كل البيانات؟', 'الإجراء ده هيمسح الأيام والخزنة والمنتجات وحركات المخزن. نزّل Backup الأول لو محتاجها.');
   if (!ok) return;
   state = {
     version:2,
@@ -471,11 +472,11 @@ $('installBtn').addEventListener('click', async () => {
 });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
 }
 
 $('dayDate').value = isoToday();
 $('withdrawalDate').value = isoToday();
 $('monthFilter').value = monthKeyFromDate(isoToday());
-renderAll();
 updateLiveCalc();
+renderAll();
