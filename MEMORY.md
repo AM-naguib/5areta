@@ -165,6 +165,11 @@ When Supabase goes live, automatically migrate the existing browser-local app da
 
 After migration is verified, Supabase becomes the primary source of truth for shared business data. Local data may remain only as a temporary fallback/cache during migration and should not continue as an independent competing data source.
 
+### Confirmed post-migration cleanup
+After the automatic local-to-Supabase migration has completed and the migrated data has been verified successfully, delete the legacy app data from localStorage automatically.
+
+The app should then use Supabase as the only primary source of truth. Do not keep the old local dataset as a parallel live copy that can diverge.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
