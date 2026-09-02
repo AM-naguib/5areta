@@ -102,6 +102,11 @@ Status: Confirmed
 
 Use one shared low-stock threshold for all products. When a product's quantity reaches 3 pieces or fewer, the app should show a low-stock warning.
 
+### D-020 — Defer damaged/lost stock and manual adjustments
+Status: Confirmed
+
+Do not add damaged/lost stock actions or manual stock quantity adjustments in the current version. Inventory changes in this version should come from purchases, internal shop consumption, and customer sales only.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
@@ -111,5 +116,4 @@ Proposal: Stock purchase increases inventory but should not immediately reduce o
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Returns, damage/loss, manual stock adjustment.
 - Whether cloud sync is required now.
