@@ -33,6 +33,9 @@ Each product should support:
 ### Confirmed selling-price behavior
 Each product has one saved default selling price. When recording a sale, that price appears automatically, but it can be edited for that individual sale before saving.
 
+### Confirmed inventory unit behavior
+Inventory is tracked by whole pieces only in the current version. Product quantities are simple counts such as 1, 2, 3. No cartons, ml, grams, or unit conversions are needed now.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -63,7 +66,6 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Should units be pieces only, or support bottles/boxes/ml/etc.?
 - Should stock purchases record supplier and invoice/notes?
 - Should internal-use inventory cost automatically feed daily operating expenses?
 - Should product-sale revenue be included in the main daily revenue number or shown separately then combined in total revenue?
