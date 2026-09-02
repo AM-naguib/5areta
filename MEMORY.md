@@ -188,6 +188,17 @@ If an actual synchronization error requires user action, the app may still surfa
 ### Confirmed product-image cloud storage
 Store product images in Supabase Storage so the same product image is available on every authorized device. Structured product records should reference the stored image rather than keeping device-only image data as the primary copy.
 
+## Supabase migration implementation status
+
+Backend scaffolding has been added to the repository:
+- `supabase/schema.sql`: tables, RLS, authorized-device checks, and private product-image bucket policies.
+- `supabase/functions/verify-device/index.ts`: one-time 6-digit device PIN verification with per-session attempt limiting.
+- `docs/SUPABASE_SETUP.md`: exact one-time Supabase Dashboard setup steps.
+
+The actual production database is not active yet. Before wiring the live GitHub Pages frontend to Supabase, the Supabase project owner must enable anonymous sign-ins, run the schema SQL, configure `SHOP_PIN` as a Supabase Function secret, and deploy the `verify-device` Edge Function.
+
+The chosen PIN value itself must never be committed to this repository.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
