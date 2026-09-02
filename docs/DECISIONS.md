@@ -79,22 +79,22 @@ Status: Superseded by D-026.
 GitHub Pages hosts the frontend. Supabase Database stores structured business data and Supabase Storage stores product images.
 
 ### D-027 — No normal owner/staff account UI
-Do not add a recurring account-login experience in the current phase.
+Do not add a recurring named account-login experience in the current phase.
 
 ### D-028 — No visible access prompt during normal use
-Status: Current again through D-038.
+Status: Refined by D-039.
 
-Normal daily use should open without a visible login/PIN prompt.
+After a browser has successfully unlocked once, normal daily use should reopen without repeatedly asking for access credentials.
 
 ### D-029 — Six-digit shop PIN for device authorization
-Status: Superseded by D-038.
+Status: Superseded by D-038 and D-039.
 
-This was previously used for first-time device authorization and has now been removed.
+This was the earlier migration/device-PIN design and is no longer the current access flow.
 
 ### D-030A — Owner-selected shared shop PIN
-Status: Superseded by D-038.
+Status: Superseded by D-038 and D-039.
 
-The previous fixed six-digit shop code is no longer part of the current architecture.
+The previous fixed six-digit device-authorization flow is no longer part of the current architecture.
 
 ### D-030B — Automatic one-time localStorage migration to Supabase
 Status: Superseded by D-037.
@@ -107,7 +107,7 @@ Status: Superseded by D-037.
 LocalStorage is now intentionally retained as a simple device cache/offline working copy.
 
 ### D-032 — Continue working offline
-If internet is unavailable, normal shop work should continue on the device and synchronize automatically when connectivity returns.
+If internet is unavailable, normal shop work should continue on a previously unlocked device and synchronize automatically when connectivity returns.
 
 ### D-033 — Last-write-wins
 For editable record conflicts, use a simple last-write-wins approach rather than manual conflict resolution.
@@ -119,17 +119,17 @@ Sync happens automatically. Do not add a persistent sync-status indicator or man
 Product images are stored in private Supabase Storage and referenced by product records.
 
 ### D-036 — Initial Supabase cloud implementation
-Status: Partially superseded by D-037 and D-038.
+Status: Partially superseded by D-037, D-038, and D-039.
 
-Supabase Database, private Storage, RLS, and browser cloud integration remain. The old PIN and one-time migration mechanisms do not.
+Supabase Database, private Storage, RLS, and browser cloud integration remain. The old one-time migration mechanism does not.
 
 ### D-037 — Simplified single-user local cache + background Supabase sync
 Status: Implemented
 
 The app is optimized for one owner and simplicity:
-- Open immediately from localStorage without a migration/loading gate.
-- Save locally first so normal work is never blocked by Supabase availability.
-- When the current device session is approved, sync the same state to Supabase automatically in the background.
+- No one-time data-migration/loading workflow.
+- Save locally first so normal work is resilient to temporary Supabase availability.
+- When the current browser session is authorized, sync the same state to Supabase automatically in the background.
 - Keep one pending local snapshot when cloud writes cannot complete; retry when internet returns.
 - When there is no pending local change, refresh from Supabase in the background.
 - Do not run a one-time local-to-cloud migration or delete the local cache after sync.
@@ -138,28 +138,35 @@ The app is optimized for one owner and simplicity:
 This supersedes D-030B and D-031 and simplifies the migration/offline portions of D-036.
 
 ### D-038 — Remove the shop PIN; keep backend device approval
+Status: Superseded by D-039.
+
+This temporary design removed all visible access prompts and required manual approval for new browser sessions. D-039 replaces manual approval with a remembered site-password gate.
+
+### D-039 — Remembered site password with automatic browser authorization
 Status: Implemented
 
-There is no shop-code/PIN prompt in the app.
+The GitHub Pages site has a password gate for browser sessions that are not already authorized.
 
-Security must still not become public:
-- Existing approved anonymous Supabase sessions keep access through RLS.
-- A random new anonymous session is not automatically authorized to read/write business data.
-- If a genuinely new browser/device is needed later, approve that device manually in Supabase instead of asking the user for a shop PIN.
-- The old PIN verification Edge Function is disabled.
-- The old PIN database tables and PIN verification database function are removed.
-- Never expose a service-role/secret key in the GitHub Pages frontend.
+Behavior:
+- A new browser/session receives an anonymous Supabase Auth session and is shown the site password screen.
+- The password is verified server-side by the `unlock-site` Edge Function against a protected password hash; the plaintext password is never committed to GitHub.
+- A correct password automatically adds the current anonymous Auth user to `authorized_devices`, which enables the existing RLS-protected database and Storage access.
+- Supabase Auth persists the approved session on a normal browser, so the site does not ask for the password again on normal subsequent opens.
+- A non-secret local unlocked marker allows a previously unlocked browser to keep using its local cache during a temporary internet outage.
+- A new device/browser, cleared browser storage, or a fresh private/incognito session must enter the password once because it does not retain the previous browser session.
+- Five failed attempts on the same anonymous session are blocked for 15 minutes.
+- The frontend contains only the public Supabase publishable key; service-role credentials remain server-side.
 
-This supersedes D-029 and D-030A.
+This replaces the manual-new-device approval model in D-038 while preserving RLS protection and the simple single-owner UX.
 
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
 - Product images: private Supabase Storage.
-- Access control: approved Supabase device sessions + RLS, no visible PIN/login in normal use.
-- Device working copy: localStorage for immediate saves/offline use.
+- Access control: remembered site password for new browser sessions + anonymous Supabase Auth + `authorized_devices` + RLS.
+- Device working copy: localStorage for immediate saves/offline use after the site has been unlocked.
 - Sync: automatic background synchronization; no migration gate and no manual sync button.
 
 ## Open decisions
-- Device revocation/reset procedure if the current phone/browser storage is lost.
-- Whether a formal account login should ever replace manual device approval if more users/devices are added later.
+- Whether to provide an in-app password-change screen later.
+- Whether a formal named account login should ever replace the simple shared site password if more users are added later.
