@@ -1,5 +1,5 @@
-const CACHE = '5areta-v3-inventory-save-fix';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = '5areta-v4-supabase-cloud';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
@@ -19,7 +19,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.ok) {
+        if (response && (response.ok || response.type === 'opaque')) {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put(event.request, copy));
         }
