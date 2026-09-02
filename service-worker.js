@@ -1,4 +1,4 @@
-const CACHE = '5areta-v5-simple-cloud';
+const CACHE = '5areta-v6-image-upload-fix';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
