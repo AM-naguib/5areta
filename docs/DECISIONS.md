@@ -86,6 +86,17 @@ The product-sales area must show and retain two separate figures:
 
 Do not collapse these into one number.
 
+### D-018 — Minimal purchase-entry fields
+Status: Confirmed
+
+When adding purchased stock, record only:
+- Product.
+- Quantity.
+- Purchase unit price.
+- Purchase date.
+
+Do not require supplier name, invoice number, or invoice notes in the current version.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
@@ -95,7 +106,6 @@ Proposal: Stock purchase increases inventory but should not immediately reduce o
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Supplier/invoice fields.
 - Low stock threshold and alerts.
 - Returns, damage/loss, manual stock adjustment.
 - Whether cloud sync is required now.
