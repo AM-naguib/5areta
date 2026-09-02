@@ -117,6 +117,11 @@ Every existing product must have an "Add stock" / restock action. Restocking the
 
 The purchase unit price is editable when adding the stock. The user must not need to create a new product just because the purchase price changed. After the restock is saved, that entered purchase price becomes the product's latest/current unit cost according to D-009.
 
+### D-022 — Restock does not change the saved selling price
+Status: Confirmed
+
+Changing the purchase price while adding stock must not automatically change the product's saved default selling price. The saved selling price stays unchanged until the user edits it manually.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
