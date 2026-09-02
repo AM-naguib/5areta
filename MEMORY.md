@@ -185,6 +185,9 @@ Supabase synchronization should happen automatically in the background. Do not a
 
 If an actual synchronization error requires user action, the app may still surface a clear error message rather than silently losing data.
 
+### Confirmed product-image cloud storage
+Store product images in Supabase Storage so the same product image is available on every authorized device. Structured product records should reference the stored image rather than keeping device-only image data as the primary copy.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
