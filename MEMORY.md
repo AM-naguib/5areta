@@ -46,10 +46,8 @@ Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
 
-For internal use:
-- Quantity is deducted from stock.
-- The consumed stock cost should be tracked as a shop cost.
-- Final accounting integration is pending a decision to avoid double counting.
+### Confirmed internal-use recording
+When stock is used by the shop, deduct the quantity and record its inventory cost in a separate business category named "استهلاك منتجات". This category must remain separate from ordinary operating expenses. We still need to confirm whether it directly reduces the main shop-profit figure or is shown only as a separate reporting line.
 
 For sale:
 - Quantity is deducted from stock.
@@ -72,8 +70,8 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
+- Should product-consumption cost reduce the main shop-profit figure or only appear as a separate metric?
 - Should stock purchases record supplier and invoice/notes?
-- Should internal-use inventory cost automatically feed daily operating expenses?
 - Should product-sale revenue be included in the main daily revenue number or shown separately then combined in total revenue?
 - Do we need low-stock alerts / minimum stock levels?
 - Do we need returns, damaged/lost stock, and manual adjustment from version 1?
