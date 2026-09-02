@@ -50,6 +50,19 @@ Confirmed behavior:
 - Full inventory movement history is retained.
 - Product sales cash and product profit are shown separately.
 
+### Product movements page
+The inventory area has a dedicated `حركات المنتجات` page, opened from the inventory header without adding another bottom-nav item.
+
+It shows purchase/restock, sale, and internal-use movements with product name, date, quantity, and the relevant cost/sale/profit details.
+
+Date filters:
+- Last 7 days (default).
+- Last 30 days.
+- All movements.
+- Custom from-date / to-date range.
+
+The page also shows filtered summary counts for movement count, purchased pieces, sold pieces, and internally used pieces. Internal use is explicitly labeled as inventory-only and does not affect the daily shop record.
+
 ## Current deployment architecture
 GitHub Pages remains the frontend/PWA.
 
@@ -119,12 +132,15 @@ Main frontend files:
 - `styles.css`
 - `app.js`
 - `inventory.js`
+- `inventory-movements.js`
 - `cloud.js`
 - `service-worker.js`
 
 `app.js` saves immediately to the local cache and calls the cloud layer when cloud access is active.
 
 The dashboard, day records, and CSV export intentionally contain no product-consumption accounting. Product consumption remains only in inventory movements/history.
+
+`inventory-movements.js` creates the dedicated filtered product-movement view and its inventory-header entry point.
 
 `cloud.js` contains the remembered site-password gate plus the simplified background Supabase read/write flow. It contains no one-time migration gate.
 
