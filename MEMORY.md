@@ -20,10 +20,10 @@ Last updated: 2026-09-03
 - PWA / installable web app.
 - Current version is local-first and can be backed up/restored.
 
-## New inventory requirements requested
-The app will gain inventory for creams, oils, and similar products.
+## Inventory requirements and confirmed behavior
+The app includes inventory for creams, oils, and similar products.
 
-Each product should support:
+Each product supports:
 - Product name.
 - Product image.
 - Quantity in stock.
@@ -68,13 +68,13 @@ An existing product must have a direct "Add stock" / restock action. The user ca
 Use one shared low-stock threshold for all products. When any product reaches 3 pieces or fewer, show a low-stock warning.
 
 ### Confirmed product-card interaction
-Product cards should keep the main daily actions visible for speed:
+Product cards keep the main daily actions visible for speed:
 - Sell.
 - Internal use / shop operation.
 - Add stock.
 - Edit selling price.
 
-Tapping the product card itself opens the product-details screen. That screen should show the image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
+Tapping the product card itself opens the product-details screen. That screen shows the image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
 
 ### Confirmed stock-adjustment scope
 Do not include damaged/lost stock actions or manual quantity adjustments in the current version. Inventory changes should come only from:
@@ -90,28 +90,28 @@ Inventory can leave stock for exactly two main reasons:
 When stock is used by the shop, deduct the quantity and record its inventory cost in a separate business category named "استهلاك منتجات". This category stays separate from ordinary operating expenses.
 
 ### Confirmed profit display with product consumption
-The app should show two profit figures:
+The app shows two profit figures:
 - Shop profit before product consumption = service revenue - ordinary operating expenses - worker payments.
 - Shop profit after product consumption = shop profit before product consumption - product-consumption inventory cost.
 
 This lets the owner see ordinary shop performance separately from the more complete profit after creams/oils/products used internally.
 
 ### Confirmed product-sales revenue reporting
-Product-sales revenue stays separate from the normal daily service-revenue figure. Do not merge it into the daily service revenue. Product sales should have their own revenue total, and each sale should store its sale amount, inventory cost, and product gross profit.
+Product-sales revenue stays separate from the normal daily service-revenue figure. Do not merge it into the daily service revenue. Product sales have their own revenue total, and each sale stores its sale amount, inventory cost, and product gross profit.
 
 ### Confirmed separate product-sales balances
 Product-sale money is tracked in a dedicated product area and must not automatically increase the main shop vault.
 The product area keeps two different figures:
 - Product sales cash = the full cash collected from product sales.
 - Product profit = product sales revenue minus the inventory cost of sold products.
-Both figures must remain visible and separate.
+Both figures remain visible and separate.
 
 For sale:
 - Quantity is deducted from stock.
 - Sale amount is recorded.
 - Cost of goods sold is calculated using the product's latest purchase price at the time of sale.
 - Product-sale profit is calculated and stored.
-- The system must keep a full movement history.
+- The system keeps a full movement history.
 
 ## Important accounting principle
 Buying stock is a cash outflow but is not automatically the same as an operating expense for profit reporting. Inventory cost becomes an expense when the item is sold or consumed by the shop. We must keep cash movement and profit accounting separate.
@@ -121,8 +121,30 @@ Keep the app deployed on GitHub Pages as it is now. Do not add Supabase or anoth
 
 The website can be opened from multiple devices, but each device keeps its own local data. Changes made on one device do not automatically appear on another device in this version.
 
+## Inventory V1 implementation status
+Inventory V1 was implemented and deployed to the existing GitHub Pages app on 2026-09-03.
+
+Implemented now:
+- A new "المخزن" tab in the main navigation.
+- Add a product with name, image, starting quantity, purchase price, saved selling price, and purchase date.
+- Product images are compressed in the browser before being stored with the device-local app data.
+- Restock an existing product with a new quantity, editable new purchase price, and date.
+- The newest restock price becomes the product's current/latest purchase cost; the saved selling price stays unchanged.
+- Record customer product sales with editable sale price, inventory cost, revenue, and gross product profit.
+- Record internal shop consumption under "استهلاك منتجات" and reduce stock.
+- Show shop profit before product consumption and after product consumption.
+- Show separate cumulative product-sales cash and product profit; neither automatically changes the main shop vault.
+- Low-stock warning at 3 pieces or fewer.
+- Product cards with quick Sell / Internal use / Add stock / Edit price actions.
+- Product detail view with complete purchase, sale, and consumption movement history.
+- Quick selling-price edit plus full product edit for name, image, and selling price.
+- Backup/restore now carries product and inventory data as part of the same local backup.
+- PWA cache version updated so the inventory release is included in offline assets.
+
+Live app: https://am-naguib.github.io/5areta/
+
 ## Open questions
-- None for the initial inventory scope currently under discussion.
+- None for the initial inventory scope currently implemented. Future changes can be decided after real use.
 
 ## Rule for future changes
 Whenever a business/accounting decision is agreed, update MEMORY.md and docs/DECISIONS.md before or with the implementation commit.
