@@ -32,15 +32,19 @@ Do not track owner-funded stock purchases as money owed back to the owner or as 
 The newest purchase price becomes the product's current unit cost for later sales and internal consumption. No weighted average or cost layers.
 
 ### D-010 — Purchase accounting
-Status: Proposed / not separately implemented
+Status: Refined by D-040
 
-Buying stock increases inventory. Inventory cost affects profit when stock is sold or consumed rather than automatically becoming an ordinary operating expense at purchase time.
+Buying stock increases inventory. Product purchase/usage cost is retained in the inventory module and does not automatically enter the daily shop-finance calculation.
 
 ### D-011 — Internal product consumption category
-Internal use deducts stock and records its inventory cost under `استهلاك منتجات`, separate from ordinary operating expenses.
+Status: Refined by D-040
+
+Internal use deducts stock and records its inventory cost in inventory movement history. It is not an ordinary operating expense and does not affect the daily shop-finance record.
 
 ### D-014 — Two shop-profit figures
-Show profit before product consumption and profit after product consumption.
+Status: Superseded by D-040
+
+The earlier design showed profit before and after product consumption. The daily shop-finance module now has one shop-profit figure only.
 
 ### D-015 — Product sales revenue separate from service revenue
 Do not merge product-sales revenue into normal daily service revenue.
@@ -159,6 +163,21 @@ Behavior:
 
 This replaces the manual-new-device approval model in D-038 while preserving RLS protection and the simple single-owner UX.
 
+### D-040 — Daily shop finance is fully independent from products
+Status: Implemented
+
+The daily registration/s سجل المحل must have no accounting dependency on products, including internal product consumption.
+
+Rules:
+- Daily shop profit = service revenue - ordinary operating expenses - worker payments.
+- Internal product consumption does not reduce daily profit or monthly shop profit.
+- Internal product consumption does not appear in daily record cards, the shop dashboard monthly breakdown, or daily CSV export.
+- Internal product consumption still deducts stock and remains in the inventory movement history for product tracking only.
+- Product sales remain separate from service revenue and the main vault.
+- The shop dashboard shows one shop-profit figure, not before/after-products figures.
+
+This supersedes D-014 and refines D-010 and D-011.
+
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
@@ -166,6 +185,7 @@ This replaces the manual-new-device approval model in D-038 while preserving RLS
 - Access control: remembered site password for new browser sessions + anonymous Supabase Auth + `authorized_devices` + RLS.
 - Device working copy: localStorage for immediate saves/offline use after the site has been unlocked.
 - Sync: automatic background synchronization; no migration gate and no manual sync button.
+- Daily finance: fully independent from inventory/products.
 
 ## Open decisions
 - Whether to provide an in-app password-change screen later.
