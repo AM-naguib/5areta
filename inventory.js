@@ -7,7 +7,9 @@
 
   function safeImageSrc(value) {
     const text = String(value || '');
-    return /^data:image\/(?:png|jpe?g|webp);base64,/i.test(text) ? text : '';
+    if (/^data:image\/(?:png|jpe?g|webp);base64,/i.test(text)) return text;
+    if (/^https:\/\/rsabmbljhjsfvadhrsti\.supabase\.co\/storage\/v1\/object\/sign\/product-images\//i.test(text)) return text;
+    return '';
   }
 
   function normalizeProduct(product = {}) {
@@ -19,6 +21,7 @@
       currentCost: Math.max(0, round(num(product.currentCost ?? product.purchasePrice))),
       sellingPrice: Math.max(0, round(num(product.sellingPrice))),
       imageData: safeImageSrc(product.imageData),
+      imagePath: String(product.imagePath || ''),
       createdAt,
       updatedAt: product.updatedAt || createdAt
     };
@@ -44,6 +47,7 @@
   }
 
   function saveSafetySnapshot() {
+    if (window.__5ARETA_CLOUD_ACTIVE__) return true;
     try {
       localStorage.setItem(INVENTORY_SAFETY_KEY, JSON.stringify(safetySnapshot()));
       return true;
@@ -97,6 +101,7 @@
   }
 
   function verifyMainStorage(productId = null) {
+    if (window.__5ARETA_CLOUD_ACTIVE__) return true;
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       if (!parsed || !Array.isArray(parsed.products)) return false;
