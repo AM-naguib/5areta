@@ -58,6 +58,10 @@ function loadState() {
 }
 
 function saveState() {
+  if (window.__5ARETA_CLOUD_ACTIVE__ && typeof window.cloudSaveState === 'function') {
+    window.cloudSaveState(state);
+    return;
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
