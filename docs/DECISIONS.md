@@ -198,6 +198,13 @@ The migration should include the existing supported records such as daily financ
 
 After the migration is verified, Supabase becomes the primary shared data source. Avoid leaving localStorage and Supabase as two independent sources of truth.
 
+### D-031 — Remove legacy localStorage data after verified migration
+Status: Confirmed
+
+After the automatic local-to-Supabase migration succeeds and the cloud copy is verified, automatically delete the old 5areta localStorage dataset from that device.
+
+From that point onward, Supabase is the single primary source of truth. Do not keep the legacy local dataset running in parallel.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
