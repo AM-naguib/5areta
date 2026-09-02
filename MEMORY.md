@@ -17,11 +17,12 @@ Keep these concepts separate:
 - Main-vault withdrawals reduce the vault only; they do not rewrite historical shop profit.
 - Main-vault balance = opening balance + accumulated net cash from days - main-vault withdrawals.
 
-Product consumption is separate from ordinary operating expense:
-- Profit before product consumption = service revenue - ordinary operating - worker.
-- Profit after product consumption = profit before products - internal product-consumption inventory cost.
-
-Product-sale money stays separate from normal service revenue and from the main vault.
+Daily shop finance is completely separate from products:
+- Product purchases do not change daily shop profit or the main vault.
+- Product sales stay separate from service revenue and the main vault.
+- Internal product consumption deducts inventory and remains visible only in inventory/product history.
+- Internal product consumption does NOT reduce daily shop profit, monthly shop profit, daily records, or main-vault calculations.
+- There is one shop-profit figure in the daily/dashboard flow: service revenue - ordinary operating - worker.
 
 ## Inventory model
 Inventory is tracked in whole pieces only.
@@ -44,7 +45,7 @@ Confirmed behavior:
 - Low-stock warning threshold is 3 pieces or fewer.
 - No damaged/lost/manual-adjustment workflow in the current version.
 - Stock leaves inventory through customer sale or internal shop use.
-- Internal use is recorded as "استهلاك منتجات".
+- Internal use is recorded as an inventory `consumption` movement and does not feed the daily finance module.
 - Product sales track quantity, revenue, inventory cost, and gross product profit.
 - Full inventory movement history is retained.
 - Product sales cash and product profit are shown separately.
@@ -122,6 +123,8 @@ Main frontend files:
 - `service-worker.js`
 
 `app.js` saves immediately to the local cache and calls the cloud layer when cloud access is active.
+
+The dashboard, day records, and CSV export intentionally contain no product-consumption accounting. Product consumption remains only in inventory movements/history.
 
 `cloud.js` contains the remembered site-password gate plus the simplified background Supabase read/write flow. It contains no one-time migration gate.
 
