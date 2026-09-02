@@ -42,6 +42,10 @@ Inventory purchases are normally paid from the owner's personal money. Adding pu
 ### Confirmed owner-funding tracking
 Do not track these owner-funded stock purchases as money owed back to the owner or as owner capital. Only the stock purchase itself, its quantity, and inventory cost are recorded.
 
+### Confirmed inventory costing method
+Use the latest purchase price as the current unit cost for each product. Do not use weighted-average costing and do not keep separate purchase-batch cost layers.
+Example: if a product previously cost 100 and the newest purchase costs 120, its current cost becomes 120 for later sale-profit and internal-consumption calculations.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -69,16 +73,12 @@ Both figures must remain visible and separate.
 For sale:
 - Quantity is deducted from stock.
 - Sale amount is recorded.
-- Cost of goods sold is calculated.
+- Cost of goods sold is calculated using the product's latest purchase price at the time of sale.
 - Product-sale profit is calculated and stored.
 - The system must keep a full movement history.
 
 ## Important accounting principle
 Buying stock is a cash outflow but is not automatically the same as an operating expense for profit reporting. Inventory cost becomes an expense when the item is sold or consumed by the shop. We must keep cash movement and profit accounting separate.
-
-## Proposed stock cost method
-Recommended: weighted average cost, unless changed by decision.
-Example: buy 10 units at 100 and later 10 at 120 => average stock cost becomes 110. Selling/using 2 units records cost of 220.
 
 ## Data / technical concern
 Product images and larger inventory history should not rely only on localStorage. Preferred next architecture is either:
