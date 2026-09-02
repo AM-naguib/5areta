@@ -86,10 +86,10 @@
     if (imageData.startsWith('data:image/')) {
       const blob = dataUrlToBlob(imageData);
       if (blob) {
-        const path = `${copy.id}/${Date.now()}.${extForMime(blob.type)}`;
+        const path = copy.imagePath || `${copy.id}/image.${extForMime(blob.type)}`;
         const { error } = await client.storage.from('product-images').upload(path, blob, {
           contentType: blob.type,
-          upsert: false,
+          upsert: true,
           cacheControl: '3600'
         });
         if (error) throw error;
