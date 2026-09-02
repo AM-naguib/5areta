@@ -54,6 +54,9 @@ When adding purchased stock, keep the entry simple and record only:
 - Purchase date.
 Do not require supplier name, invoice number, or invoice notes in the current version.
 
+### Confirmed restock behavior for existing products
+An existing product must have a direct "Add stock" / restock action. The user can add more quantity to that same product and enter/edit the purchase unit price for the new stock addition, plus the purchase date. A changed purchase price must not require creating a new product. After saving the restock, the entered purchase price becomes that product's latest/current unit cost.
+
 ### Confirmed low-stock behavior
 Use one shared low-stock threshold for all products. When any product reaches 3 pieces or fewer, show a low-stock warning.
 
