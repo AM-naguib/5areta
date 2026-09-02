@@ -1,250 +1,165 @@
 # Decision Log
 
-This file records agreed business and product decisions for 5areta.
+This file records agreed business, product, and architecture decisions for 5areta.
 
 ## Confirmed
 
 ### D-001 — Daily finance separation
-Status: Confirmed
-
 Shop profit, personal withdrawals, and main-vault withdrawals are separate concepts.
 
-### D-002 — Inventory has two main outbound purposes
-Status: Confirmed
+### D-002 — Two inventory outbound purposes
+Stock leaves inventory through internal shop use or customer sale.
 
-Stock leaves inventory as either:
-- Internal shop operation / consumption.
-- Customer sale.
-
-### D-003 — Product sales must track profit
-Status: Confirmed
-
-For every product sale, record quantity, sale value, inventory cost, and resulting gross product profit.
+### D-003 — Product sales track profit
+Every product sale stores quantity, sale value, inventory cost, and gross product profit.
 
 ### D-004 — Full inventory movement history
-Status: Confirmed
+Purchases, sales, and internal consumption are logged as movements rather than only overwriting quantity.
 
-Every stock addition or deduction must be logged rather than only overwriting the current quantity.
+### D-005 — Saved default selling price
+Each product has a saved selling price that prefills a sale but can be changed for that individual sale.
 
-### D-005 — Default selling price per product
-Status: Confirmed
+### D-006 — Whole-piece inventory
+Inventory quantities are whole pieces only. No carton/ml/gram conversion is required.
 
-Each product has a saved default selling price. When recording a sale, that price is prefilled automatically, but the user can edit it for that specific sale before saving.
+### D-007 — Owner-funded inventory purchases
+Inventory purchases are normally paid from the owner's personal money and do not automatically reduce the main vault.
 
-### D-006 — Inventory unit model
-Status: Confirmed
+### D-008 — No owner receivable/capital tracking for stock
+Do not track owner-funded stock purchases as money owed back to the owner or as owner capital.
 
-Inventory quantities are tracked as whole pieces only in the current version. No cartons, ml, grams, or unit conversions are required.
+### D-009 — Latest purchase price costing
+The newest purchase price becomes the product's current unit cost for later sales and internal consumption. No weighted average or cost layers.
 
-### D-007 — Inventory purchase payment source
-Status: Confirmed
+### D-010 — Purchase accounting
+Status: Proposed / not separately implemented
 
-Inventory purchases are paid from the owner's personal money by default. Purchasing stock must not automatically reduce the main-vault balance.
+Buying stock increases inventory. Inventory cost affects profit when stock is sold or consumed rather than automatically becoming an ordinary operating expense at purchase time.
 
-### D-008 — Owner-funded purchase tracking
-Status: Confirmed
+### D-011 — Internal product consumption category
+Internal use deducts stock and records its inventory cost under `استهلاك منتجات`, separate from ordinary operating expenses.
 
-Do not track owner-funded stock purchases as money owed back to the owner or as owner capital. Record only the inventory purchase, quantity, and inventory cost. No separate owner receivable/capital balance is maintained for these purchases.
+### D-014 — Two shop-profit figures
+Show profit before product consumption and profit after product consumption.
 
-### D-009 — Inventory costing uses latest purchase price
-Status: Confirmed
+### D-015 — Product sales revenue separate from service revenue
+Do not merge product-sales revenue into normal daily service revenue.
 
-Use the latest purchase price as the current inventory unit cost for the product. Do not use weighted-average costing and do not keep cost layers by purchase batch.
+### D-016 — Product-sales money separate from main vault
+Product-sale cash does not automatically increase the main shop vault.
 
-Example: if the product previously cost 100 and the newest purchase costs 120, the current unit cost becomes 120 for subsequent product-sale profit and internal-consumption calculations.
+### D-017 — Track product cash and product profit separately
+Show full product-sales cash and product gross profit as different figures.
 
-### D-011 — Internal inventory consumption category
-Status: Confirmed
+### D-018 — Minimal stock-purchase fields
+Purchase entry requires only product, quantity, unit purchase price, and date.
 
-When a product is taken from inventory for use in the shop, deduct its quantity and record its inventory cost under a separate business category named "استهلاك منتجات" (product consumption). Do not merge this amount into ordinary operating expenses.
+### D-019 — Low-stock threshold
+Use one shared threshold of 3 pieces or fewer.
 
-### D-014 — Two-level shop profit reporting
-Status: Confirmed
+### D-020 — No damaged/lost/manual quantity adjustment in current version
+Inventory changes come from purchases, internal consumption, and customer sales only.
 
-Show two shop-profit figures:
-1. Shop profit before product consumption = service revenue - ordinary operating expenses - worker payments.
-2. Shop profit after product consumption = shop profit before product consumption - inventory product-consumption cost.
+### D-021 — Restock existing product
+Restocking an existing product allows added quantity, new/editable purchase unit price, and purchase date. The entered price becomes current cost.
 
-This keeps ordinary operating performance visible while also showing the more complete profit after internal product use.
+### D-022 — Restock does not change saved selling price
+Changing purchase cost does not automatically change the product's saved selling price.
 
-### D-015 — Product sales revenue is separate from service revenue
-Status: Confirmed
+### D-023 — Selling price editable from quick and full edit
+Both edit paths change the same saved default selling price.
 
-Do not merge product-sales revenue into the normal daily service-revenue figure. Product revenue should be displayed and reported as a separate revenue stream. Product-sale profit is also tracked separately using sale value minus inventory cost.
+### D-024 — Product cards have quick actions and details
+Cards provide Sell, Internal use, Add stock, and Edit price. Tapping the card opens full product details and movement history.
 
-### D-016 — Separate product-sales balance
-Status: Confirmed
+### D-025 — Local-only architecture
+Status: Superseded by D-026.
 
-Money generated by product sales must be tracked in a dedicated product-sales area that is separate from the main shop vault. Product-sale cash must not automatically increase the main-vault balance.
+### D-026 — GitHub Pages frontend + Supabase shared cloud
+GitHub Pages hosts the frontend. Supabase Database stores structured business data and Supabase Storage stores product images.
 
-### D-017 — Track both product cash and product profit
-Status: Confirmed
+### D-027 — No normal owner/staff account UI
+Do not add a recurring account-login experience in the current phase.
 
-The product-sales area must show and retain two separate figures:
-- Product sales cash: the full cash collected from product sales.
-- Product profit: product sales revenue minus inventory cost of the sold items.
+### D-028 — No visible access prompt during normal use
+Status: Current again through D-038.
 
-Do not collapse these into one number.
+Normal daily use should open without a visible login/PIN prompt.
 
-### D-018 — Minimal purchase-entry fields
-Status: Confirmed
+### D-029 — Six-digit shop PIN for device authorization
+Status: Superseded by D-038.
 
-When adding purchased stock, record only:
-- Product.
-- Quantity.
-- Purchase unit price.
-- Purchase date.
+This was previously used for first-time device authorization and has now been removed.
 
-Do not require supplier name, invoice number, or invoice notes in the current version.
+### D-030A — Owner-selected shared shop PIN
+Status: Superseded by D-038.
 
-### D-019 — Shared low-stock threshold is 3 pieces
-Status: Confirmed
+The previous fixed six-digit shop code is no longer part of the current architecture.
 
-Use one shared low-stock threshold for all products. When a product's quantity reaches 3 pieces or fewer, the app should show a low-stock warning.
+### D-030B — Automatic one-time localStorage migration to Supabase
+Status: Superseded by D-037.
 
-### D-020 — Defer damaged/lost stock and manual adjustments
-Status: Confirmed
+The previous automatic migration/verification gate has been removed because it added startup complexity and could block normal work.
 
-Do not add damaged/lost stock actions or manual stock quantity adjustments in the current version. Inventory changes in this version should come from purchases, internal shop consumption, and customer sales only.
+### D-031 — Delete legacy localStorage after migration
+Status: Superseded by D-037.
 
-### D-021 — Restock an existing product with a new purchase price
-Status: Confirmed
+LocalStorage is now intentionally retained as a simple device cache/offline working copy.
 
-Every existing product must have an "Add stock" / restock action. Restocking the product must let the user enter:
-- The additional quantity.
-- The purchase unit price for this restock.
-- The purchase date.
+### D-032 — Continue working offline
+If internet is unavailable, normal shop work should continue on the device and synchronize automatically when connectivity returns.
 
-The purchase unit price is editable when adding the stock. The user must not need to create a new product just because the purchase price changed. After the restock is saved, that entered purchase price becomes the product's latest/current unit cost according to D-009.
+### D-033 — Last-write-wins
+For editable record conflicts, use a simple last-write-wins approach rather than manual conflict resolution.
 
-### D-022 — Restock does not change the saved selling price
-Status: Confirmed
+### D-034 — Background-only synchronization UX
+Sync happens automatically. Do not add a persistent sync-status indicator or manual Sync Now button. Real failures may still show a short error message.
 
-Changing the purchase price while adding stock must not automatically change the product's saved default selling price. The saved selling price stays unchanged until the user edits it manually.
+### D-035 — Product images in Supabase Storage
+Product images are stored in private Supabase Storage and referenced by product records.
 
-### D-023 — Selling price can be edited from two places
-Status: Confirmed
+### D-036 — Initial Supabase cloud implementation
+Status: Partially superseded by D-037 and D-038.
 
-The saved default selling price can be changed in two ways:
-- A quick "Edit price" action directly from the product card.
-- The full product edit screen, where the user can also edit the product name and image.
+Supabase Database, private Storage, RLS, and browser cloud integration remain. The old PIN and one-time migration mechanisms do not.
 
-Both actions update the same saved default selling price.
-
-### D-024 — Product cards have quick actions plus a details screen
-Status: Confirmed
-
-Each product card should keep the main daily actions visible for fast use:
-- Sell.
-- Internal use / shop operation.
-- Add stock.
-- Edit selling price.
-
-Tapping the product card itself opens a product-details screen. The details screen should show the product image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
-
-### D-025 — Keep GitHub Pages and device-local data for now
-Status: Superseded by D-026
-
-This was the previous decision. It is no longer the target architecture.
-
-### D-026 — GitHub Pages frontend with Supabase shared storage
-Status: Confirmed
-
-Keep the website deployed on GitHub Pages, but move persistent business data to Supabase so all authorized devices use the same data.
-
-Target architecture:
-- GitHub Pages hosts the frontend application.
-- Supabase Database stores shop days, vault movements, products, inventory movements, prices, and other structured business data.
-- Supabase Storage stores product images.
-- Data should synchronize across the owner's phone and the shop device instead of being isolated per browser/device.
-- The current local-storage implementation remains temporary until the Supabase migration is implemented and verified.
-
-### D-027 — No user-account login in the first Supabase phase
-Status: Confirmed
-
-Do not add owner/staff user accounts or a normal login system in the first Supabase migration phase. Keep the user experience simple and postpone account-based authentication.
-
-### D-028 — No visible access prompt in normal daily use
-Status: Superseded by D-029
-
-The earlier requirement was to have no visible PIN prompt at all. This has been refined: a PIN prompt is acceptable once when authorizing a new device, but should not appear during normal daily use afterward.
-
-### D-029 — Six-digit shop PIN for first-time device authorization
-Status: Confirmed
-
-When a new or unrecognized device opens the shared Supabase-backed app, ask for one six-digit shop PIN. After successful authorization, remember that device so normal future use opens directly without a recurring login or PIN prompt.
-
-Security requirements:
-- PIN verification must happen in a protected backend/server-side path, not by comparing a secret embedded in the public GitHub Pages JavaScript.
-- Do not expose a Supabase service-role key, raw PIN, PIN hash, or any server secret in frontend code.
-- After successful PIN verification, the device should receive/store only a revocable device authorization credential suitable for normal use.
-- Supabase data must not be left unrestricted/publicly writable.
-
-### D-030 — Owner-selected shared six-digit shop PIN
-Status: Confirmed
-
-The owner chooses one fixed six-digit shop PIN. The same shop PIN is used when authorizing any new or unrecognized device.
-
-The PIN is entered only during first-time device authorization. After a device is authorized, normal use should open directly without asking for the PIN again unless that device authorization is revoked or reset.
-
-The PIN itself must not be stored in the public GitHub Pages source or exposed to frontend JavaScript as a server secret.
-
-### D-030 — Automatically migrate existing local data to Supabase
-Status: Confirmed
-
-On the first successful Supabase setup, automatically migrate all existing 5areta browser-local business data into Supabase rather than starting from an empty cloud database.
-
-The migration should include the existing supported records such as daily finance data, vault withdrawals, products, inventory movements, prices, and product images where technically possible.
-
-After the migration is verified, Supabase becomes the primary shared data source. Avoid leaving localStorage and Supabase as two independent sources of truth.
-
-### D-031 — Remove legacy localStorage data after verified migration
-Status: Confirmed
-
-After the automatic local-to-Supabase migration succeeds and the cloud copy is verified, automatically delete the old 5areta localStorage dataset from that device.
-
-From that point onward, Supabase is the single primary source of truth. Do not keep the legacy local dataset running in parallel.
-
-### D-032 — Offline queue with automatic Supabase synchronization
-Status: Confirmed
-
-If internet connectivity is unavailable, do not block normal shop work. Save new business changes temporarily on the device in an offline queue and automatically synchronize them to Supabase when connectivity returns.
-
-The app should visibly indicate that changes are pending synchronization and clear that state only after Supabase confirms the writes.
-
-### D-033 — Last-write-wins for same-record conflicts
-Status: Confirmed
-
-When two authorized devices edit the same editable record from different states, use last-write-wins. The most recently accepted update becomes the current value.
-
-Do not add a manual conflict-resolution prompt in this phase. Normal inventory movements should still retain their movement history.
-
-### D-034 — Background-only synchronization UI
-Status: Confirmed
-
-Run synchronization automatically in the background. Do not show a persistent synchronized/synchronizing/offline status indicator and do not add a manual sync button in the normal interface in this phase.
-
-Actual errors that require user action should still be surfaced clearly so data loss is not silent.
-
-### D-035 — Store product images in Supabase Storage
-Status: Confirmed
-
-Product images must be uploaded to Supabase Storage and referenced by the shared product data so images are available across authorized devices.
-
-Do not keep product images device-local as the primary production storage after the Supabase migration.
-
-### D-036 — Supabase cloud migration implemented
+### D-037 — Simplified single-user local cache + background Supabase sync
 Status: Implemented
 
-The GitHub Pages app is now wired to the connected Supabase project. The production design uses anonymous Supabase Auth sessions plus one-time device approval with the shop PIN. RLS restricts business data to approved device sessions. Product images use private Supabase Storage. The legacy localStorage dataset is migrated automatically on first approved-device setup, verified, then removed.
+The app is optimized for one owner and simplicity:
+- Open immediately from localStorage without a migration/loading gate.
+- Save locally first so normal work is never blocked by Supabase availability.
+- When the current device session is approved, sync the same state to Supabase automatically in the background.
+- Keep one pending local snapshot when cloud writes cannot complete; retry when internet returns.
+- When there is no pending local change, refresh from Supabase in the background.
+- Do not run a one-time local-to-cloud migration or delete the local cache after sync.
+- The simple sync may replace the shared table snapshot, which is acceptable for the intended single-owner workflow.
 
-Offline business changes are queued locally and synchronized automatically when connectivity returns.
+This supersedes D-030B and D-031 and simplifies the migration/offline portions of D-036.
 
-## Proposed / awaiting confirmation
+### D-038 — Remove the shop PIN; keep backend device approval
+Status: Implemented
 
-### D-010 — Accounting for purchases
-Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
+There is no shop-code/PIN prompt in the app.
+
+Security must still not become public:
+- Existing approved anonymous Supabase sessions keep access through RLS.
+- A random new anonymous session is not automatically authorized to read/write business data.
+- If a genuinely new browser/device is needed later, approve that device manually in Supabase instead of asking the user for a shop PIN.
+- The old PIN verification Edge Function is disabled.
+- The old PIN database tables and PIN verification database function are removed.
+- Never expose a service-role/secret key in the GitHub Pages frontend.
+
+This supersedes D-029 and D-030A.
+
+## Current architecture summary
+- Frontend/PWA: GitHub Pages.
+- Shared cloud data: Supabase Database.
+- Product images: private Supabase Storage.
+- Access control: approved Supabase device sessions + RLS, no visible PIN/login in normal use.
+- Device working copy: localStorage for immediate saves/offline use.
+- Sync: automatic background synchronization; no migration gate and no manual sync button.
 
 ## Open decisions
-- Device revocation/reset flow if a phone or shop device is lost.
-- Migration path for any existing device-local data into Supabase.
+- Device revocation/reset procedure if the current phone/browser storage is lost.
+- Whether a formal account login should ever replace manual device approval if more users/devices are added later.
