@@ -1,4 +1,4 @@
-const CACHE = '5areta-v6-image-upload-fix';
+const CACHE = '5areta-v7-site-password';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
