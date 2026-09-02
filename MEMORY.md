@@ -54,6 +54,9 @@ When adding purchased stock, keep the entry simple and record only:
 - Purchase date.
 Do not require supplier name, invoice number, or invoice notes in the current version.
 
+### Confirmed low-stock behavior
+Use one shared low-stock threshold for all products, not a different number for each product. When a product reaches that threshold or below, show a low-stock warning. The exact shared threshold number still needs to be chosen.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -95,7 +98,7 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Do we need low-stock alerts / minimum stock levels?
+- What exact shared number should trigger the low-stock warning?
 - Do we need returns, damaged/lost stock, and manual adjustment from version 1?
 - Local-only vs multi-device cloud sync now?
 
