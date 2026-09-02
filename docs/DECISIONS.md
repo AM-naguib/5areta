@@ -233,6 +233,13 @@ Product images must be uploaded to Supabase Storage and referenced by the shared
 
 Do not keep product images device-local as the primary production storage after the Supabase migration.
 
+### D-036 — Supabase cloud migration implemented
+Status: Implemented
+
+The GitHub Pages app is now wired to the connected Supabase project. The production design uses anonymous Supabase Auth sessions plus one-time device approval with the shop PIN. RLS restricts business data to approved device sessions. Product images use private Supabase Storage. The legacy localStorage dataset is migrated automatically on first approved-device setup, verified, then removed.
+
+Offline business changes are queued locally and synchronized automatically when connectivity returns.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
