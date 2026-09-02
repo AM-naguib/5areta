@@ -97,6 +97,11 @@ When adding purchased stock, record only:
 
 Do not require supplier name, invoice number, or invoice notes in the current version.
 
+### D-019 — One shared low-stock threshold
+Status: Confirmed
+
+Use one shared low-stock threshold for all products instead of a different threshold per product. When a product's quantity reaches that shared threshold or below, the app should show a low-stock warning. The exact threshold number is still to be selected.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
@@ -106,6 +111,6 @@ Proposal: Stock purchase increases inventory but should not immediately reduce o
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
-- Low stock threshold and alerts.
+- Exact shared low-stock threshold number.
 - Returns, damage/loss, manual stock adjustment.
 - Whether cloud sync is required now.
