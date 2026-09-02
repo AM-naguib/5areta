@@ -46,6 +46,11 @@ Status: Confirmed
 
 Do not track owner-funded stock purchases as money owed back to the owner or as owner capital. Record only the inventory purchase, quantity, and inventory cost. No separate owner receivable/capital balance is maintained for these purchases.
 
+### D-011 — Internal inventory consumption category
+Status: Confirmed
+
+When a product is taken from inventory for use in the shop, deduct its quantity and record its inventory cost under a separate business category named "استهلاك منتجات" (product consumption). Do not merge this amount into ordinary operating expenses. Whether this category is included directly in the main shop-profit formula is a separate decision to confirm.
+
 ## Proposed / awaiting confirmation
 
 ### D-009 — Costing method
@@ -55,9 +60,6 @@ Reason: simple, understandable, and appropriate for repeated purchases at changi
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
-### D-011 — Internal shop consumption
-Proposal: Internal-use stock creates an operating cost automatically based on inventory cost. Avoid entering the same amount manually as an operating expense.
-
 ### D-012 — Product sales revenue
 Proposal: Show service revenue and product revenue separately, plus combined total business revenue.
 
@@ -65,6 +67,7 @@ Proposal: Show service revenue and product revenue separately, plus combined tot
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
 
 ## Open decisions
+- Whether product-consumption cost reduces the main shop-profit figure or is shown only as a separate reporting metric.
 - Supplier/invoice fields.
 - Low stock threshold and alerts.
 - Returns, damage/loss, manual stock adjustment.
