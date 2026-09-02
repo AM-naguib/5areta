@@ -148,20 +148,16 @@ function renderRecords() {
   }
   list.innerHTML = days.map((day) => {
     const { profit, netToVault } = dayMetrics(day);
-    const consumption = num(window.inventoryConsumptionForDate?.(day.date));
-    const afterProducts = round(profit - consumption);
     return `
       <article class="record-card">
         <div class="record-top">
           <div class="record-date"><strong>${escapeHtml(formatDate(day.date))}</strong><span>${numberFmt.format(num(day.customers))} زبون</span></div>
-          <div class="record-profit"><strong class="${profit < 0 ? 'negative' : 'positive'}">${money.format(profit)}</strong><span>ربح قبل المنتجات</span></div>
+          <div class="record-profit"><strong class="${profit < 0 ? 'negative' : 'positive'}">${money.format(profit)}</strong><span>ربح المحل</span></div>
         </div>
         <div class="record-grid">
           <div><span>الإيراد</span><strong>${money.format(num(day.revenue))}</strong></div>
           <div><span>التشغيل</span><strong>${money.format(num(day.operating))}</strong></div>
           <div><span>الصنايعي</span><strong>${money.format(num(day.worker))}</strong></div>
-          <div><span>استهلاك منتجات</span><strong>${money.format(consumption)}</strong></div>
-          <div><span>بعد المنتجات</span><strong class="${afterProducts < 0 ? 'negative' : 'positive'}">${money.format(afterProducts)}</strong></div>
           <div><span>شخصي</span><strong>${money.format(num(day.personal))}</strong></div>
           <div><span>للخزنة</span><strong class="${netToVault < 0 ? 'negative' : 'positive'}">${money.format(netToVault)}</strong></div>
         </div>
@@ -209,7 +205,6 @@ function renderAll() {
   renderRecords();
   renderVault();
   window.renderInventory?.();
-  window.renderInventoryDashboard?.();
 }
 
 function escapeHtml(value) {
@@ -422,11 +417,10 @@ $('importBackupInput').addEventListener('change', async (event) => {
 });
 
 $('exportCsvBtn').addEventListener('click', () => {
-  const header = ['التاريخ','عدد الزباين','الإيراد','تشغيل المحل','الصنايعي','ربح قبل المنتجات','استهلاك منتجات','ربح بعد المنتجات','سحب شخصي من دخل اليوم','صافي الداخل للخزنة','ملاحظات'];
+  const header = ['التاريخ','عدد الزباين','الإيراد','تشغيل المحل','الصنايعي','ربح المحل','سحب شخصي من دخل اليوم','صافي الداخل للخزنة','ملاحظات'];
   const rows = [...state.days].sort((a,b) => a.date.localeCompare(b.date)).map(day => {
     const { profit, netToVault } = dayMetrics(day);
-    const consumption = num(window.inventoryConsumptionForDate?.(day.date));
-    return [day.date, day.customers, day.revenue, day.operating, day.worker, profit, consumption, round(profit - consumption), day.personal, netToVault, day.notes || ''];
+    return [day.date, day.customers, day.revenue, day.operating, day.worker, profit, day.personal, netToVault, day.notes || ''];
   });
   const csv = '\uFEFF' + [header, ...rows].map(row => row.map(csvCell).join(',')).join('\n');
   downloadBlob(new Blob([csv], {type:'text/csv;charset=utf-8'}), `5areta-days-${isoToday()}.csv`);
