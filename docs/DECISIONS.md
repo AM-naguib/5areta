@@ -178,6 +178,21 @@ Rules:
 
 This supersedes D-014 and refines D-010 and D-011.
 
+### D-041 — Dedicated filtered product movements page
+Status: Implemented
+
+The inventory module has a separate `حركات المنتجات` view opened from the inventory page rather than adding a sixth bottom-navigation item.
+
+The movement view includes all inventory movement types: purchase/restock, customer sale, and internal shop use. Each row shows the product, movement type, date, quantity, and the relevant purchase-cost, sale-value, inventory-cost, or sale-profit details.
+
+Date filters:
+- Last 7 days as the default.
+- Last 30 days.
+- All movements.
+- Custom from-date / to-date.
+
+The selected period also shows summary counts for total movements, purchased units, sold units, and internally used units. Internal-use cards explicitly state that they belong to inventory only and do not affect the daily shop-finance record.
+
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
@@ -186,6 +201,7 @@ This supersedes D-014 and refines D-010 and D-011.
 - Device working copy: localStorage for immediate saves/offline use after the site has been unlocked.
 - Sync: automatic background synchronization; no migration gate and no manual sync button.
 - Daily finance: fully independent from inventory/products.
+- Inventory movements: dedicated filtered history page inside the inventory module.
 
 ## Open decisions
 - Whether to provide an in-app password-change screen later.
