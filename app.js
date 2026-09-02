@@ -1,8 +1,8 @@
 const STORAGE_KEY = '5areta-shop-v1';
 
 const defaultState = {
-  version: 1,
-  settings: { openingVault: 0 },
+  version: 2,
+  settings: { openingVault: 0, lowStockThreshold: 3 },
   days: [
     {
       id: 'seed-2026-09-01',
@@ -15,7 +15,9 @@ const defaultState = {
       notes: 'بيانات 1/9 التي تم تسجيلها'
     }
   ],
-  withdrawals: []
+  withdrawals: [],
+  products: [],
+  inventoryMovements: []
 };
 
 let state = loadState();
@@ -40,10 +42,15 @@ function loadState() {
     if (!raw) return structuredClone(defaultState);
     const parsed = JSON.parse(raw);
     return {
-      version: 1,
-      settings: { openingVault: num(parsed?.settings?.openingVault) },
+      version: 2,
+      settings: {
+        openingVault: num(parsed?.settings?.openingVault),
+        lowStockThreshold: 3
+      },
       days: Array.isArray(parsed.days) ? parsed.days : [],
-      withdrawals: Array.isArray(parsed.withdrawals) ? parsed.withdrawals : []
+      withdrawals: Array.isArray(parsed.withdrawals) ? parsed.withdrawals : [],
+      products: Array.isArray(parsed.products) ? parsed.products : [],
+      inventoryMovements: Array.isArray(parsed.inventoryMovements) ? parsed.inventoryMovements : []
     };
   } catch {
     return structuredClone(defaultState);
@@ -106,6 +113,7 @@ function formatDate(date) {
 }
 
 function setSignedClass(el, value) {
+  if (!el) return;
   el.classList.remove('positive', 'negative');
   if (value > 0) el.classList.add('positive');
   if (value < 0) el.classList.add('negative');
@@ -137,16 +145,20 @@ function renderRecords() {
   }
   list.innerHTML = days.map((day) => {
     const { profit, netToVault } = dayMetrics(day);
+    const consumption = num(window.inventoryConsumptionForDate?.(day.date));
+    const afterProducts = round(profit - consumption);
     return `
       <article class="record-card">
         <div class="record-top">
           <div class="record-date"><strong>${escapeHtml(formatDate(day.date))}</strong><span>${numberFmt.format(num(day.customers))} زبون</span></div>
-          <div class="record-profit"><strong class="${profit < 0 ? 'negative' : 'positive'}">${money.format(profit)}</strong><span>ربح المحل</span></div>
+          <div class="record-profit"><strong class="${profit < 0 ? 'negative' : 'positive'}">${money.format(profit)}</strong><span>ربح قبل المنتجات</span></div>
         </div>
         <div class="record-grid">
           <div><span>الإيراد</span><strong>${money.format(num(day.revenue))}</strong></div>
           <div><span>التشغيل</span><strong>${money.format(num(day.operating))}</strong></div>
           <div><span>الصنايعي</span><strong>${money.format(num(day.worker))}</strong></div>
+          <div><span>استهلاك منتجات</span><strong>${money.format(consumption)}</strong></div>
+          <div><span>بعد المنتجات</span><strong class="${afterProducts < 0 ? 'negative' : 'positive'}">${money.format(afterProducts)}</strong></div>
           <div><span>شخصي</span><strong>${money.format(num(day.personal))}</strong></div>
           <div><span>للخزنة</span><strong class="${netToVault < 0 ? 'negative' : 'positive'}">${money.format(netToVault)}</strong></div>
         </div>
@@ -193,6 +205,8 @@ function renderAll() {
   renderDashboard();
   renderRecords();
   renderVault();
+  window.renderInventory?.();
+  window.renderInventoryDashboard?.();
 }
 
 function escapeHtml(value) {
@@ -284,7 +298,7 @@ $('dayForm').addEventListener('submit', (event) => {
 });
 
 $('cancelEditBtn').addEventListener('click', resetDayForm);
-$('monthFilter').addEventListener('change', renderDashboard);
+$('monthFilter').addEventListener('change', renderAll);
 
 document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.target)));
 
@@ -313,7 +327,7 @@ document.addEventListener('click', async (event) => {
   }
 
   if (deleteDay) {
-    const ok = await confirmAction('حذف اليوم؟', 'هيتم حذف بيانات اليوم من الحسابات ورصيد الخزنة.');
+    const ok = await confirmAction('حذف اليوم؟', 'هيتم حذف بيانات اليوم من الحسابات ورصيد الخزنة. حركات المنتجات المسجلة في نفس التاريخ هتفضل موجودة.');
     if (!ok) return;
     state.days = state.days.filter(item => item.id !== deleteDay);
     saveState(); renderAll(); showToast('تم حذف اليوم');
@@ -384,10 +398,15 @@ $('importBackupInput').addEventListener('change', async (event) => {
     const ok = await confirmAction('استيراد النسخة؟', 'البيانات الموجودة حاليًا هتستبدل ببيانات ملف الـ Backup.');
     if (!ok) return;
     state = {
-      version: 1,
-      settings: { openingVault: num(parsed?.settings?.openingVault) },
+      version: 2,
+      settings: {
+        openingVault: num(parsed?.settings?.openingVault),
+        lowStockThreshold: 3
+      },
       days: parsed.days,
-      withdrawals: parsed.withdrawals
+      withdrawals: parsed.withdrawals,
+      products: Array.isArray(parsed.products) ? parsed.products : [],
+      inventoryMovements: Array.isArray(parsed.inventoryMovements) ? parsed.inventoryMovements : []
     };
     saveState(); renderAll(); resetDayForm(); resetWithdrawalForm(); showToast('تم استيراد البيانات');
   } catch {
@@ -398,10 +417,11 @@ $('importBackupInput').addEventListener('change', async (event) => {
 });
 
 $('exportCsvBtn').addEventListener('click', () => {
-  const header = ['التاريخ','عدد الزباين','الإيراد','تشغيل المحل','الصنايعي','ربح المحل','سحب شخصي من دخل اليوم','صافي الداخل للخزنة','ملاحظات'];
+  const header = ['التاريخ','عدد الزباين','الإيراد','تشغيل المحل','الصنايعي','ربح قبل المنتجات','استهلاك منتجات','ربح بعد المنتجات','سحب شخصي من دخل اليوم','صافي الداخل للخزنة','ملاحظات'];
   const rows = [...state.days].sort((a,b) => a.date.localeCompare(b.date)).map(day => {
     const { profit, netToVault } = dayMetrics(day);
-    return [day.date, day.customers, day.revenue, day.operating, day.worker, profit, day.personal, netToVault, day.notes || ''];
+    const consumption = num(window.inventoryConsumptionForDate?.(day.date));
+    return [day.date, day.customers, day.revenue, day.operating, day.worker, profit, consumption, round(profit - consumption), day.personal, netToVault, day.notes || ''];
   });
   const csv = '\uFEFF' + [header, ...rows].map(row => row.map(csvCell).join(',')).join('\n');
   downloadBlob(new Blob([csv], {type:'text/csv;charset=utf-8'}), `5areta-days-${isoToday()}.csv`);
@@ -420,9 +440,16 @@ function downloadBlob(blob, filename) {
 }
 
 $('resetDataBtn').addEventListener('click', async () => {
-  const ok = await confirmAction('مسح كل البيانات؟', 'الإجراء ده هيمسح الأيام والخزنة من الجهاز. نزّل Backup الأول لو محتاجها.');
+  const ok = await confirmAction('مسح كل البيانات؟', 'الإجراء ده هيمسح الأيام والخزنة والمنتجات وحركات المخزن من الجهاز. نزّل Backup الأول لو محتاجها.');
   if (!ok) return;
-  state = { version:1, settings:{openingVault:0}, days:[], withdrawals:[] };
+  state = {
+    version:2,
+    settings:{openingVault:0, lowStockThreshold:3},
+    days:[],
+    withdrawals:[],
+    products:[],
+    inventoryMovements:[]
+  };
   saveState(); renderAll(); resetDayForm(); resetWithdrawalForm(); showToast('تم مسح البيانات');
 });
 
