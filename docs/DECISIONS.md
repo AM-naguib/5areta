@@ -180,13 +180,20 @@ Security requirements:
 - After successful PIN verification, the device should receive/store only a revocable device authorization credential suitable for normal use.
 - Supabase data must not be left unrestricted/publicly writable.
 
+### D-030 — Owner-selected shared six-digit shop PIN
+Status: Confirmed
+
+The owner chooses one fixed six-digit shop PIN. The same shop PIN is used when authorizing any new or unrecognized device.
+
+The PIN is entered only during first-time device authorization. After a device is authorized, normal use should open directly without asking for the PIN again unless that device authorization is revoked or reset.
+
+The PIN itself must not be stored in the public GitHub Pages source or exposed to frontend JavaScript as a server secret.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
 ## Open decisions
-- How the initial six-digit shop PIN is created/set.
-- Whether one shared PIN is used for all new devices or PINs can vary by device.
 - Device revocation/reset flow if a phone or shop device is lost.
 - Migration path for any existing device-local data into Supabase.
