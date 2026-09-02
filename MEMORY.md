@@ -180,6 +180,11 @@ If two authorized devices edit the same editable record while working from diffe
 
 Inventory movement history should still be retained for normal stock actions, but editable record conflicts do not require a manual conflict-resolution screen in this phase.
 
+### Confirmed background-only synchronization UX
+Supabase synchronization should happen automatically in the background. Do not add a persistent sync-status indicator or a manual "sync now" button in the normal interface in this phase.
+
+If an actual synchronization error requires user action, the app may still surface a clear error message rather than silently losing data.
+
 ## Open questions
 - Device revocation/reset flow if a phone or shop device is lost.
 - How to migrate any existing local data into Supabase when the migration goes live.
