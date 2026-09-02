@@ -131,6 +131,17 @@ The saved default selling price can be changed in two ways:
 
 Both actions update the same saved default selling price.
 
+### D-024 — Product cards have quick actions plus a details screen
+Status: Confirmed
+
+Each product card should keep the main daily actions visible for fast use:
+- Sell.
+- Internal use / shop operation.
+- Add stock.
+- Edit selling price.
+
+Tapping the product card itself opens a product-details screen. The details screen should show the product image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
