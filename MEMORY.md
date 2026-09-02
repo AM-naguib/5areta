@@ -33,6 +33,8 @@ Each product should support:
 ### Confirmed selling-price behavior
 Each product has one saved default selling price. When recording a sale, that price appears automatically, but it can be edited for that individual sale before saving.
 
+Changing a product's purchase price during restocking must not automatically change its saved default selling price. The selling price stays as-is until the user edits it manually.
+
 ### Confirmed inventory unit behavior
 Inventory is tracked by whole pieces only in the current version. Product quantities are simple counts such as 1, 2, 3. No cartons, ml, grams, or unit conversions are needed now.
 
