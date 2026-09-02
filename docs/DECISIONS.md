@@ -60,6 +60,11 @@ Show two shop-profit figures:
 
 This keeps ordinary operating performance visible while also showing the more complete profit after internal product use.
 
+### D-015 — Product sales revenue is separate from service revenue
+Status: Confirmed
+
+Do not merge product-sales revenue into the normal daily service-revenue figure. Product revenue should be displayed and reported as a separate revenue stream. Product-sale profit is also tracked separately using sale value minus inventory cost.
+
 ## Proposed / awaiting confirmation
 
 ### D-009 — Costing method
@@ -68,9 +73,6 @@ Reason: simple, understandable, and appropriate for repeated purchases at changi
 
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
-
-### D-012 — Product sales revenue
-Proposal: Show service revenue and product revenue separately, plus combined total business revenue.
 
 ### D-013 — Storage architecture
 Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
