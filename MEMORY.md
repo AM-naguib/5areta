@@ -57,6 +57,12 @@ Do not require supplier name, invoice number, or invoice notes in the current ve
 ### Confirmed low-stock behavior
 Use one shared low-stock threshold for all products. When any product reaches 3 pieces or fewer, show a low-stock warning.
 
+### Confirmed stock-adjustment scope
+Do not include damaged/lost stock actions or manual quantity adjustments in the current version. Inventory changes should come only from:
+- Purchases into stock.
+- Internal shop consumption.
+- Customer sales.
+
 Inventory can leave stock for exactly two main reasons:
 1. Shop operation / internal use.
 2. Customer sale.
@@ -98,7 +104,6 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
-- Do we need returns, damaged/lost stock, and manual adjustment from version 1?
 - Local-only vs multi-device cloud sync now?
 
 ## Rule for future changes
