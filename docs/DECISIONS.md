@@ -142,13 +142,17 @@ Each product card should keep the main daily actions visible for fast use:
 
 Tapping the product card itself opens a product-details screen. The details screen should show the product image, current quantity, latest purchase price, saved selling price, product profit information, and the full movement history for that product.
 
+### D-025 — Keep GitHub Pages and device-local data for now
+Status: Confirmed
+
+Keep the current deployment model on GitHub Pages. Do not add Supabase or another cloud-sync backend in the current version.
+
+The website can be opened from different devices, but each device keeps its own local app data. Changes made on one device are not automatically synchronized to another device in this version.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
 Proposal: Stock purchase increases inventory but should not immediately reduce operating profit. Cost affects profit when stock is consumed internally or sold.
 
-### D-013 — Storage architecture
-Proposal: move inventory and images away from localStorage. Use IndexedDB for local-first v1, or Supabase now if multi-device synchronization is required immediately.
-
 ## Open decisions
-- Whether cloud sync is required now.
+- None for the initial inventory scope currently under discussion.
