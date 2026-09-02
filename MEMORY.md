@@ -61,10 +61,10 @@ Supabase is connected and stores shared business data:
 The previous one-time localStorage-to-Supabase migration flow has been removed because it added unnecessary startup complexity.
 
 Current behavior:
-- The app opens immediately from a simple local cache; no migration screen blocks normal work.
+- The app opens from a simple local cache after access is unlocked; there is no migration screen.
 - Normal saves are written to localStorage immediately for speed and resilience.
-- When the current device has an approved Supabase session, the same state syncs automatically to Supabase in the background.
-- If the internet/cloud is temporarily unavailable, the app keeps working locally and retries the pending snapshot when connectivity returns.
+- When the current browser has an approved Supabase session, the same state syncs automatically to Supabase in the background.
+- If the internet/cloud is temporarily unavailable after a browser has previously been unlocked, the app can keep working locally and retry when connectivity returns.
 - When there are no pending local changes, the app refreshes from Supabase in the background.
 - There is no manual "sync now" workflow and no persistent sync-status UI.
 - Supabase remains the shared cloud copy; localStorage is a practical device cache/offline working copy, not a one-time migration source.
@@ -72,17 +72,19 @@ Current behavior:
 The simplified sync assumes a single active owner workflow. A saved snapshot can replace the shared table state, which is intentionally simpler than multi-user conflict handling.
 
 ## Current access model
-The six-digit shop-code/PIN flow has been removed.
+The site now has a remembered password gate.
 
-There is no visible login or PIN prompt in normal use.
-
-Security is not made public/open:
-- Existing approved anonymous Supabase device sessions remain protected by RLS.
-- A random new browser/session is NOT automatically given access to business data.
-- If browser storage is cleared or a genuinely new device is used later, that device can be approved manually in Supabase instead of adding a shop-code flow back into the app.
+Confirmed behavior:
+- A new browser/session gets an anonymous Supabase Auth session, then sees a site password screen.
+- Correct password verification happens server-side through the `unlock-site` Edge Function; the plaintext password is never committed to GitHub.
+- Successful verification adds that anonymous Auth user to `authorized_devices`, so RLS grants access to business data.
+- The browser also stores only a non-secret local unlocked marker so previously unlocked normal browsers can continue working locally if internet is temporarily unavailable.
+- On the same normal browser, the persisted Supabase session means the password is not requested again during normal use.
+- A new browser, cleared browser storage, or a fresh private/incognito session must enter the password once because those contexts do not share/persist the previous session.
+- Five failed password attempts for the same anonymous session are rate-limited for 15 minutes.
 - Never expose a Supabase service-role/secret key in GitHub Pages.
 
-The old PIN verification backend has been disabled and its PIN database tables/functions removed.
+The actual site password value is secret and must not be written to repository files or project-memory documents.
 
 ## Product images
 Product images are stored in the private Supabase Storage bucket `product-images` and loaded through signed URLs on approved sessions.
@@ -94,13 +96,21 @@ Production project ref: `rsabmbljhjsfvadhrsti`
 
 Core tables:
 - `authorized_devices`
+- `site_access_config`
+- `site_password_attempts`
 - `app_settings`
 - `days`
 - `withdrawals`
 - `products`
 - `inventory_movements`
 
-The obsolete shop-PIN tables `device_pin_attempts` and `shop_access_config` and the `verify_shop_pin` database function have been removed.
+Access function:
+- `verify_site_password(text)` is callable only by trusted service-role code.
+
+Edge Function:
+- `unlock-site` verifies the site password server-side and authorizes the current anonymous session.
+
+The older shop-PIN-specific tables/functions remain removed; the current password gate is a site access mechanism rather than the old migration/device-PIN workflow.
 
 ## Implementation notes
 Main frontend files:
@@ -113,7 +123,7 @@ Main frontend files:
 
 `app.js` saves immediately to the local cache and calls the cloud layer when cloud access is active.
 
-`cloud.js` now contains the simplified background Supabase read/write flow. It contains no migration gate and no shop-PIN UI.
+`cloud.js` contains the remembered site-password gate plus the simplified background Supabase read/write flow. It contains no one-time migration gate.
 
 ## Rule for future changes
 Whenever a business/accounting/product/architecture decision is agreed, update both `MEMORY.md` and `docs/DECISIONS.md` with the implementation.
