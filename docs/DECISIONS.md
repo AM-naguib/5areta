@@ -205,6 +205,13 @@ After the automatic local-to-Supabase migration succeeds and the cloud copy is v
 
 From that point onward, Supabase is the single primary source of truth. Do not keep the legacy local dataset running in parallel.
 
+### D-032 — Offline queue with automatic Supabase synchronization
+Status: Confirmed
+
+If internet connectivity is unavailable, do not block normal shop work. Save new business changes temporarily on the device in an offline queue and automatically synchronize them to Supabase when connectivity returns.
+
+The app should visibly indicate that changes are pending synchronization and clear that state only after Supabase confirms the writes.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
