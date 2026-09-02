@@ -12,6 +12,14 @@ create table if not exists public.device_pin_attempts (
   window_started_at timestamptz not null default now()
 );
 
+create table if not exists public.shop_access_config (
+  id smallint primary key check (id = 1),
+  pin_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+-- Set pin_hash securely in the connected Supabase project. Never commit the plaintext PIN.
+
 create table if not exists public.app_settings (
   id smallint primary key default 1 check (id = 1),
   opening_vault numeric(14,2) not null default 0,
@@ -81,6 +89,20 @@ alter table public.withdrawals enable row level security;
 alter table public.products enable row level security;
 alter table public.inventory_movements enable row level security;
 alter table public.app_meta enable row level security;
+
+create or replace function public.verify_shop_pin(candidate text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $
+  select exists (
+    select 1 from public.shop_access_config c
+    where c.id = 1
+      and extensions.crypt(candidate, c.pin_hash) = c.pin_hash
+  );
+$;
 
 create or replace function public.is_authorized_device()
 returns boolean
