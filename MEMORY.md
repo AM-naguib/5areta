@@ -56,6 +56,9 @@ The app should show two profit figures:
 
 This lets the owner see ordinary shop performance separately from the more complete profit after creams/oils/products used internally.
 
+### Confirmed product-sales revenue reporting
+Product-sales revenue stays separate from the normal daily service-revenue figure. Do not merge it into the daily service revenue. Product sales should have their own revenue total, and each sale should store its sale amount, inventory cost, and product gross profit.
+
 For sale:
 - Quantity is deducted from stock.
 - Sale amount is recorded.
@@ -78,7 +81,6 @@ Decision pending.
 
 ## Open questions
 - Should stock purchases record supplier and invoice/notes?
-- Should product-sale revenue be included in the main daily revenue number or shown separately then combined in total revenue?
 - Do we need low-stock alerts / minimum stock levels?
 - Do we need returns, damaged/lost stock, and manual adjustment from version 1?
 - Local-only vs multi-device cloud sync now?
