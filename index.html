@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="نظام بسيط لإدارة إيراد المحل والمصاريف والخزنة" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>5areta — إدارة المحل</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">5areta</p>
+        <h1>إدارة المحل</h1>
+      </div>
+      <button class="icon-btn" id="installBtn" hidden aria-label="تثبيت التطبيق" title="تثبيت التطبيق">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 15v4h14v-4"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="view active" data-view="dashboard">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">نظرة سريعة</p>
+            <h2 id="monthTitle">سبتمبر 2026</h2>
+          </div>
+          <label class="month-picker">
+            <span>الشهر</span>
+            <input type="month" id="monthFilter" value="2026-09" />
+          </label>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card hero-stat">
+            <span class="stat-label">ربح المحل</span>
+            <strong id="statProfit">0 ج.م</strong>
+            <small>الإيراد − التشغيل − الصنايعي</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">الإيراد</span>
+            <strong id="statRevenue">0 ج.م</strong>
+            <small id="statCustomers">0 زبون</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">رصيد الخزنة</span>
+            <strong id="statVault">0 ج.م</strong>
+            <small>الرصيد الحالي الفعلي</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">متوسط الزبون</span>
+            <strong id="statAvg">0 ج.م</strong>
+            <small>متوسط الإيراد لكل زبون</small>
+          </article>
+        </div>
+
+        <section class="panel quick-entry">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">التسجيل اليومي</p>
+              <h3>سجّل يومك في أقل من دقيقة</h3>
+            </div>
+            <span class="status-dot"><i></i> يتحسب تلقائيًا</span>
+          </div>
+
+          <form id="dayForm" class="entry-form">
+            <input type="hidden" id="editingDayId" />
+            <label class="field field-wide">
+              <span>التاريخ</span>
+              <input type="date" id="dayDate" required />
+            </label>
+            <label class="field">
+              <span>عدد الزباين</span>
+              <input type="number" id="customers" min="0" inputmode="numeric" placeholder="0" />
+            </label>
+            <label class="field">
+              <span>الإيراد</span>
+              <div class="money-input"><input type="number" id="revenue" min="0" step="1" inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            </label>
+            <label class="field">
+              <span>تشغيل المحل</span>
+              <div class="money-input"><input type="number" id="operating" min="0" step="1" inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            </label>
+            <label class="field">
+              <span>الصنايعي</span>
+              <div class="money-input"><input type="number" id="worker" min="0" step="1" inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            </label>
+            <label class="field">
+              <span>سحب شخصي من دخل اليوم</span>
+              <div class="money-input"><input type="number" id="personal" min="0" step="1" inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            </label>
+            <label class="field field-wide">
+              <span>ملاحظات <em>اختياري</em></span>
+              <input type="text" id="dayNotes" maxlength="120" placeholder="مثلاً: يوم هادي / شراء خامات..." />
+            </label>
+
+            <div class="live-calc field-wide">
+              <div>
+                <span>ربح المحل</span>
+                <strong id="liveProfit">0 ج.م</strong>
+              </div>
+              <span class="calc-arrow">←</span>
+              <div>
+                <span>الداخل للخزنة</span>
+                <strong id="liveNet">0 ج.م</strong>
+              </div>
+            </div>
+
+            <div class="form-actions field-wide">
+              <button class="btn secondary" type="button" id="cancelEditBtn" hidden>إلغاء</button>
+              <button class="btn primary" type="submit" id="saveDayBtn">حفظ اليوم</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel compact-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">تفاصيل الشهر</p>
+              <h3>الفلوس خرجت فين؟</h3>
+            </div>
+          </div>
+          <div class="breakdown-list">
+            <div><span>تشغيل المحل</span><strong id="breakOperating">0 ج.م</strong></div>
+            <div><span>الصنايعي</span><strong id="breakWorker">0 ج.م</strong></div>
+            <div><span>سحب شخصي من دخل الأيام</span><strong id="breakPersonal">0 ج.م</strong></div>
+            <div><span>سحب من الخزنة الرئيسية</span><strong id="breakVaultWithdrawals">0 ج.م</strong></div>
+            <div class="emphasis"><span>صافي الداخل للخزنة</span><strong id="breakNet">0 ج.م</strong></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="records">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">السجل</p>
+            <h2>كل الأيام</h2>
+          </div>
+          <button class="btn ghost" id="exportCsvBtn">تصدير CSV</button>
+        </div>
+        <div id="recordsList" class="records-list"></div>
+      </section>
+
+      <section class="view" data-view="vault">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">الخزنة الرئيسية</p>
+            <h2>حركة الخزنة</h2>
+          </div>
+          <div class="vault-balance-mini">
+            <span>الرصيد الحالي</span>
+            <strong id="vaultHeaderBalance">0 ج.م</strong>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">الرصيد الافتتاحي</p>
+              <h3>الفلوس الموجودة قبل بدء التسجيل</h3>
+            </div>
+          </div>
+          <form id="openingBalanceForm" class="inline-form">
+            <div class="money-input grow"><input type="number" id="openingBalance" min="0" step="1" inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            <button class="btn secondary" type="submit">حفظ</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">سحب من الخزنة</p>
+              <h3>مثلاً جمعية أو التزام كبير</h3>
+            </div>
+          </div>
+          <form id="withdrawalForm" class="entry-form">
+            <input type="hidden" id="editingWithdrawalId" />
+            <label class="field">
+              <span>التاريخ</span>
+              <input type="date" id="withdrawalDate" required />
+            </label>
+            <label class="field">
+              <span>المبلغ</span>
+              <div class="money-input"><input type="number" id="withdrawalAmount" min="1" step="1" required inputmode="decimal" placeholder="0" /><b>ج.م</b></div>
+            </label>
+            <label class="field field-wide">
+              <span>السبب</span>
+              <select id="withdrawalReason">
+                <option value="جمعية">جمعية</option>
+                <option value="التزام شخصي">التزام شخصي</option>
+                <option value="سداد دين">سداد دين</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </label>
+            <label class="field field-wide">
+              <span>ملاحظات <em>اختياري</em></span>
+              <input type="text" id="withdrawalNotes" maxlength="120" placeholder="تفاصيل إضافية" />
+            </label>
+            <div class="form-actions field-wide">
+              <button class="btn secondary" type="button" id="cancelWithdrawalEditBtn" hidden>إلغاء</button>
+              <button class="btn primary" type="submit">تسجيل السحب</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel compact-panel">
+          <div class="panel-head"><h3>آخر حركات الخزنة</h3></div>
+          <div id="withdrawalsList" class="records-list"></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="settings">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">الإعدادات والنسخ الاحتياطي</p>
+            <h2>خلّي بياناتك معاك</h2>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">نسخة احتياطية</p>
+              <h3>نزّل بياناتك أو رجّعها</h3>
+            </div>
+          </div>
+          <div class="settings-actions">
+            <button class="btn secondary" id="exportBackupBtn">تنزيل Backup</button>
+            <label class="btn ghost file-btn">استيراد Backup<input type="file" id="importBackupInput" accept="application/json,.json" hidden /></label>
+          </div>
+          <p class="helper">حاليًا البيانات محفوظة على نفس الجهاز. استخدم الـ Backup قبل تغيير الموبايل أو مسح المتصفح.</p>
+        </section>
+
+        <section class="panel danger-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">إعادة ضبط</p>
+              <h3>مسح كل البيانات</h3>
+            </div>
+          </div>
+          <button class="btn danger" id="resetDataBtn">مسح البيانات</button>
+        </section>
+
+        <section class="panel historical-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">مرجع سابق</p>
+              <h3>يوليو وأغسطس</h3>
+            </div>
+          </div>
+          <div class="history-grid">
+            <article>
+              <span>يوليو 2026</span>
+              <strong>57,850 ج.م</strong>
+              <small>425 زبون • صافي مسجّل 25,470</small>
+            </article>
+            <article>
+              <span>أغسطس 2026</span>
+              <strong>63,850 ج.م</strong>
+              <small>585 زبون • صافي مسجّل 29,200</small>
+            </article>
+          </div>
+          <p class="helper">الأرقام دي للمرجع فقط ومش داخلة في رصيد الخزنة أو تقارير الأيام الجديدة.</p>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <button class="nav-item active" data-target="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+        <span>الرئيسية</span>
+      </button>
+      <button class="nav-item" data-target="records">
+        <svg viewBox="0 0 24 24"><path d="M5 5h14M5 12h14M5 19h14"/></svg>
+        <span>السجل</span>
+      </button>
+      <button class="nav-item" data-target="vault">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16v11H4V7Zm2-3h12v3H6V4Zm9 8h3"/></svg>
+        <span>الخزنة</span>
+      </button>
+      <button class="nav-item" data-target="settings">
+        <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm8 4 2-1-2-4-2 1a8 8 0 0 0-2-1l-1-3h-4l-1 3a8 8 0 0 0-2 1L6 7l-2 4 2 1a8 8 0 0 0 0 2l-2 1 2 4 2-1a8 8 0 0 0 2 1l1 3h4l1-3a8 8 0 0 0 2-1l2 1 2-4-2-1a8 8 0 0 0 0-2Z"/></svg>
+        <span>الإعدادات</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confirm-sheet" id="confirmSheet" hidden>
+    <button class="sheet-backdrop" data-confirm="cancel" aria-label="إغلاق"></button>
+    <div class="sheet-card">
+      <h3 id="confirmTitle">متأكد؟</h3>
+      <p id="confirmText"></p>
+      <div class="sheet-actions">
+        <button class="btn secondary" data-confirm="cancel">إلغاء</button>
+        <button class="btn danger" data-confirm="ok">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
