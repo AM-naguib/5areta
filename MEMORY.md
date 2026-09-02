@@ -59,6 +59,9 @@ This lets the owner see ordinary shop performance separately from the more compl
 ### Confirmed product-sales revenue reporting
 Product-sales revenue stays separate from the normal daily service-revenue figure. Do not merge it into the daily service revenue. Product sales should have their own revenue total, and each sale should store its sale amount, inventory cost, and product gross profit.
 
+### Confirmed separate product-sales balance
+Product-sale money is tracked in a dedicated balance for products and must not automatically increase the main shop vault. The exact rule for what this dedicated balance represents still needs confirmation: all cash collected from product sales, product profit only, or both figures tracked separately.
+
 For sale:
 - Quantity is deducted from stock.
 - Sale amount is recorded.
@@ -80,6 +83,7 @@ Product images and larger inventory history should not rely only on localStorage
 Decision pending.
 
 ## Open questions
+- What exactly should the dedicated product balance represent: full product-sale cash, product profit only, or both shown separately?
 - Should stock purchases record supplier and invoice/notes?
 - Do we need low-stock alerts / minimum stock levels?
 - Do we need returns, damaged/lost stock, and manual adjustment from version 1?
