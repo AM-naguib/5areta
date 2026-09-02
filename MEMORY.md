@@ -128,6 +128,11 @@ Target architecture:
 - Authorized devices read and write the same Supabase data.
 - The current localStorage implementation is temporary until migration is completed and verified.
 
+### Confirmed first-phase access experience
+Do not add normal user accounts or an owner/staff login system in the first Supabase migration phase. The app should stay simple to open and use.
+
+This does not mean the public GitHub Pages frontend can safely use a fully open Supabase database. We still need to choose a lightweight access-control method before cloud data goes live. Do not expose a Supabase service-role key or any other server secret in the frontend.
+
 ## Inventory V1 implementation status
 Inventory V1 is currently deployed on GitHub Pages and works with browser-local storage. This is now considered the temporary implementation before the Supabase migration.
 
@@ -150,7 +155,7 @@ Implemented in the current live version:
 Live app: https://am-naguib.github.io/5areta/
 
 ## Open questions
-- Supabase authentication model: owner-only login or separate owner/staff accounts.
+- Lightweight access control for Supabase without normal user accounts/login.
 - How to migrate any existing local data into Supabase when the migration goes live.
 
 ## Rule for future changes
