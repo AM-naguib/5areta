@@ -1,5 +1,5 @@
-const CACHE = '5areta-v8-daily-finance-separated';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = '5areta-v9-product-movements';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './inventory-movements.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
