@@ -107,6 +107,16 @@ Status: Confirmed
 
 Do not add damaged/lost stock actions or manual stock quantity adjustments in the current version. Inventory changes in this version should come from purchases, internal shop consumption, and customer sales only.
 
+### D-021 — Restock an existing product with a new purchase price
+Status: Confirmed
+
+Every existing product must have an "Add stock" / restock action. Restocking the product must let the user enter:
+- The additional quantity.
+- The purchase unit price for this restock.
+- The purchase date.
+
+The purchase unit price is editable when adding the stock. The user must not need to create a new product just because the purchase price changed. After the restock is saved, that entered purchase price becomes the product's latest/current unit cost according to D-009.
+
 ## Proposed / awaiting confirmation
 
 ### D-010 — Accounting for purchases
