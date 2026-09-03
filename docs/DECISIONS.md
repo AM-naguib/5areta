@@ -233,6 +233,34 @@ Rules:
 - The custom product-movement date range follows the same display convention.
 - User-facing daily CSV dates are exported as `DD/MM/YYYY`.
 
+### D-045 — Cancel inventory movements without deleting history
+Status: Implemented
+
+An incorrect inventory movement is corrected by cancellation rather than deletion.
+
+Rules:
+- A canceled movement remains visible in movement history and is clearly marked `ملغية`.
+- Canceling a sale or internal-use movement returns its quantity to the product stock.
+- Canceling a purchase/restock movement removes that quantity from stock.
+- A purchase movement cannot be canceled if doing so would make current stock negative; newer outbound movements must be corrected first.
+- After canceling a purchase, the product current cost is recalculated from the latest remaining non-canceled purchase; if none remains it becomes zero.
+- Canceled movements do not count toward product sales cash, product profit, sold units, consumption totals, or movement summary totals.
+- The cancellation and stock correction execute atomically in Supabase through `cancel_inventory_movement(text)`.
+- Movement cancellation requires an online authorized session so stock correction cannot be split between local and cloud state.
+
+### D-046 — Product archiving and inventory search
+Status: Implemented
+
+Products that are no longer actively stocked are archived instead of being deleted.
+
+Rules:
+- Archiving hides a product from the normal inventory list without deleting the product or any movement history.
+- Archived products are available in a separate `المؤرشف` inventory scope and can be restored to the normal inventory list.
+- Product search filters quickly by product name in the currently selected active/archived scope.
+- Archived products are excluded from active-product count, active-stock unit count, and low-stock alerts.
+- Historical product sales remain available even when their product is archived.
+- Archive state is stored in Supabase and cached locally; offline archive/restore changes are queued and synchronized automatically when connectivity returns.
+
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
@@ -241,7 +269,8 @@ Rules:
 - Device working copy: localStorage for immediate saves/offline use after the site has been unlocked.
 - Sync: automatic record-level background synchronization; no migration gate and no manual sync button.
 - Daily finance: fully independent from inventory/products and unique by calendar date.
-- Inventory movements: dedicated filtered history page inside the inventory module.
+- Inventory movements: dedicated filtered history page with non-destructive cancellation/correction.
+- Inventory products: searchable active list plus recoverable archived list.
 - Full user-facing dates: numeric `DD/MM/YYYY`; internal storage: ISO `YYYY-MM-DD`.
 
 ## Open decisions
