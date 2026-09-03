@@ -219,6 +219,20 @@ Rules:
 - When editing an existing day, changing its date to another already-used date is also blocked.
 - Supabase enforces the same rule with the unique index `days_unique_date_idx` on `days(date)` as a backend safety layer.
 
+### D-044 — Numeric day/month/year date format
+Status: Implemented
+
+All user-facing full dates use `DD/MM/YYYY` with numeric day, month, and year.
+
+Rules:
+- Example: 3 September 2026 displays as `03/09/2026`.
+- Date entry fields use the same day/month/year order instead of browser-dependent month/day/year display.
+- Valid one- or two-digit day/month input is normalized to two digits.
+- Arabic/Persian digit input may be entered and is normalized for parsing.
+- Internal data continues to store dates as ISO `YYYY-MM-DD` so sorting, comparisons, Supabase, offline sync, and filters stay reliable.
+- The custom product-movement date range follows the same display convention.
+- User-facing daily CSV dates are exported as `DD/MM/YYYY`.
+
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
@@ -228,6 +242,7 @@ Rules:
 - Sync: automatic record-level background synchronization; no migration gate and no manual sync button.
 - Daily finance: fully independent from inventory/products and unique by calendar date.
 - Inventory movements: dedicated filtered history page inside the inventory module.
+- Full user-facing dates: numeric `DD/MM/YYYY`; internal storage: ISO `YYYY-MM-DD`.
 
 ## Open decisions
 - Whether to provide an in-app password-change screen later.
