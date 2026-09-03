@@ -24,6 +24,14 @@ Daily shop finance is completely separate from products:
 - Internal product consumption does NOT reduce daily shop profit, monthly shop profit, daily records, or main-vault calculations.
 - There is one shop-profit figure in the daily/dashboard flow: service revenue - ordinary operating - worker.
 
+## Daily records
+There must be only one daily-finance record for each calendar date.
+
+Confirmed behavior:
+- If the user tries to save a new day for a date that already exists, the app blocks the duplicate and offers to open the existing day for editing.
+- Editing a day cannot change its date onto another already-existing day.
+- Supabase also enforces this rule with a unique index on `days.date`, so duplicate dates are blocked at the database level as a second safety layer.
+
 ## Inventory model
 Inventory is tracked in whole pieces only.
 
@@ -71,22 +79,25 @@ Supabase is connected and stores shared business data:
 - Supabase Storage: private product images.
 - RLS protects business tables and Storage.
 
-### Simplified single-user data flow
-The previous one-time localStorage-to-Supabase migration flow has been removed because it added unnecessary startup complexity.
+### Local cache + safe background Supabase sync
+The previous one-time localStorage-to-Supabase migration flow remains removed.
 
 Current behavior:
 - The app opens from a simple local cache after access is unlocked; there is no migration screen.
 - Normal saves are written to localStorage immediately for speed and resilience.
-- When the current browser has an approved Supabase session, the same state syncs automatically to Supabase in the background.
-- If the internet/cloud is temporarily unavailable after a browser has previously been unlocked, the app can keep working locally and retry when connectivity returns.
+- When the current browser has an approved Supabase session, changes sync automatically in the background.
+- The cloud layer stores a last-known cloud base snapshot and compares the current local state against that base.
+- Sync writes only changed records and explicit deletions; it no longer replaces complete Supabase tables on every save.
+- A stale local snapshot cannot delete unrelated cloud rows merely because those rows are absent from that stale snapshot.
+- When reconnecting after offline work, the app first fetches the latest cloud state, reapplies only the locally changed records/deletions on top of it, then syncs those differences.
+- For the same record changed both remotely and locally, the existing last-write-wins rule remains: the local pending edit being synchronized wins for that record.
+- Keep one pending local snapshot while cloud writes cannot complete; it is used to derive record-level differences, not to replace entire tables.
 - When there are no pending local changes, the app refreshes from Supabase in the background.
 - There is no manual "sync now" workflow and no persistent sync-status UI.
-- Supabase remains the shared cloud copy; localStorage is a practical device cache/offline working copy, not a one-time migration source.
-
-The simplified sync assumes a single active owner workflow. A saved snapshot can replace the shared table state, which is intentionally simpler than multi-user conflict handling.
+- Supabase remains the shared cloud copy; localStorage is a practical device cache/offline working copy.
 
 ## Current access model
-The site now has a remembered password gate.
+The site has a remembered password gate.
 
 Confirmed behavior:
 - A new browser/session gets an anonymous Supabase Auth session, then sees a site password screen.
@@ -118,6 +129,9 @@ Core tables:
 - `products`
 - `inventory_movements`
 
+Important database safety:
+- `days_unique_date_idx` is a unique index on `days(date)`.
+
 Access function:
 - `verify_site_password(text)` is callable only by trusted service-role code.
 
@@ -142,7 +156,7 @@ The dashboard, day records, and CSV export intentionally contain no product-cons
 
 `inventory-movements.js` creates the dedicated filtered product-movement view and its inventory-header entry point.
 
-`cloud.js` contains the remembered site-password gate plus the simplified background Supabase read/write flow. It contains no one-time migration gate.
+`cloud.js` contains the remembered site-password gate, duplicate-day guard, and record-level background Supabase synchronization. It contains no one-time migration gate.
 
 ## Rule for future changes
 Whenever a business/accounting/product/architecture decision is agreed, update both `MEMORY.md` and `docs/DECISIONS.md` with the implementation.
