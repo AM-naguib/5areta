@@ -262,3 +262,126 @@
 
   window.renderInventoryMovements();
 })();
+
+(() => {
+  const nativeValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  if (!nativeValue?.get || !nativeValue?.set) return;
+
+  function latinDigits(value) {
+    return String(value ?? '')
+      .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+      .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+      .trim();
+  }
+
+  function validIso(year, month, day) {
+    const y = Number(year);
+    const m = Number(month);
+    const d = Number(day);
+    if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d) || y < 1900 || y > 2200 || m < 1 || m > 12 || d < 1 || d > 31) return '';
+    const check = new Date(Date.UTC(y, m - 1, d));
+    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) return '';
+    return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+
+  function toIso(value) {
+    const text = latinDigits(value);
+    if (!text) return '';
+
+    let match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(text);
+    if (match) return validIso(match[1], match[2], match[3]);
+
+    match = /^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/.exec(text);
+    if (match) return validIso(match[3], match[2], match[1]);
+
+    match = /^(\d{2})(\d{2})(\d{4})$/.exec(text);
+    if (match) return validIso(match[3], match[2], match[1]);
+
+    return '';
+  }
+
+  function toDisplay(value) {
+    const iso = toIso(value);
+    if (!iso) return '';
+    const [year, month, day] = iso.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  function enhanceDateInput(input) {
+    if (!(input instanceof HTMLInputElement) || input.dataset.dmyDate === '1') return;
+    if (input.type !== 'date') return;
+
+    const initialValue = nativeValue.get.call(input);
+    const initialDefault = input.defaultValue;
+    input.type = 'text';
+    input.dataset.dmyDate = '1';
+    input.inputMode = 'numeric';
+    input.placeholder = 'DD/MM/YYYY';
+    input.autocomplete = 'off';
+    input.dir = 'ltr';
+    input.style.textAlign = 'left';
+
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return toIso(nativeValue.get.call(this));
+      },
+      set(value) {
+        const display = toDisplay(value);
+        nativeValue.set.call(this, display || latinDigits(value));
+      }
+    });
+
+    const shown = toDisplay(initialValue);
+    nativeValue.set.call(input, shown || latinDigits(initialValue));
+    if (initialDefault) input.defaultValue = toDisplay(initialDefault) || latinDigits(initialDefault);
+
+    const normalize = () => {
+      const current = nativeValue.get.call(input);
+      const formatted = toDisplay(current);
+      if (formatted) nativeValue.set.call(input, formatted);
+    };
+    input.addEventListener('blur', normalize);
+    input.addEventListener('change', normalize);
+  }
+
+  function enhanceDateInputs(root = document) {
+    if (root instanceof HTMLInputElement) enhanceDateInput(root);
+    root.querySelectorAll?.('input[type="date"]').forEach(enhanceDateInput);
+  }
+
+  window.dateToIso = toIso;
+  window.formatDateNumeric = toDisplay;
+  window.enhanceDateInputs = enhanceDateInputs;
+
+  const previousFormatDate = window.formatDate;
+  window.formatDate = (value) => toDisplay(value) || (typeof previousFormatDate === 'function' ? previousFormatDate(value) : String(value || ''));
+
+  const previousDownloadBlob = window.downloadBlob;
+  if (typeof previousDownloadBlob === 'function') {
+    window.downloadBlob = (blob, filename) => {
+      if (!(blob instanceof Blob) || !String(blob.type || '').includes('text/csv')) {
+        return previousDownloadBlob(blob, filename);
+      }
+      blob.text()
+        .then((text) => text.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, '$3/$2/$1'))
+        .then((text) => previousDownloadBlob(new Blob([text], { type: blob.type }), filename))
+        .catch(() => previousDownloadBlob(blob, filename));
+    };
+  }
+
+  enhanceDateInputs(document);
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) enhanceDateInputs(node);
+      });
+    });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  window.renderAll?.();
+  window.renderInventoryMovements?.();
+})();
