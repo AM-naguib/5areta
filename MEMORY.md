@@ -52,6 +52,7 @@ Each product has:
 - Current quantity.
 - Latest/current purchase cost.
 - Saved default selling price.
+- Archive status.
 
 Confirmed behavior:
 - Latest purchase price becomes the product's current cost for subsequent sales/consumption.
@@ -69,6 +70,30 @@ Confirmed behavior:
 - Full inventory movement history is retained.
 - Product sales cash and product profit are shown separately.
 
+### Product movement cancellation / correction
+Incorrect product movements are canceled, not deleted.
+
+Confirmed behavior:
+- The original movement remains visible and is marked `ملغية`.
+- Canceling a sale or internal-use movement returns its quantity to stock.
+- Canceling a purchase/restock movement removes its quantity from stock.
+- A purchase cannot be canceled if that would make current quantity negative; newer outbound movements must be corrected first.
+- Canceling a purchase recalculates current purchase cost from the newest remaining active purchase, or zero if none remains.
+- Canceled movements are excluded from product-sales cash, product profit, sold pieces, usage totals, and movement summary totals.
+- Cancellation is executed atomically in Supabase through `cancel_inventory_movement(text)` so movement status and product quantity are corrected together.
+- Movement cancellation requires an online authorized session.
+
+### Product archiving and search
+Products can be archived instead of deleted.
+
+Confirmed behavior:
+- Archived products disappear from the normal inventory list but their record, image reference, quantity, and full movement history are retained.
+- The inventory screen has a separate `المؤرشف` scope with restore action.
+- The inventory screen has quick name search for the currently selected active/archived scope.
+- Archived products are excluded from active-product count, active-stock piece count, and low-stock warnings.
+- Historical product sales remain included in historical product sales reporting even if the product is archived.
+- Archive/restore state is stored in Supabase and cached locally. Offline archive/restore is queued and synchronized when connectivity returns.
+
 ### Product movements page
 The inventory area has a dedicated `حركات المنتجات` page, opened from the inventory header without adding another bottom-nav item.
 
@@ -80,7 +105,7 @@ Date filters:
 - All movements.
 - Custom from-date / to-date range.
 
-The page also shows filtered summary counts for movement count, purchased pieces, sold pieces, and internally used pieces. Internal use is explicitly labeled as inventory-only and does not affect the daily shop record.
+The page also shows filtered summary counts for active movement count, purchased pieces, sold pieces, and internally used pieces. Canceled movements remain visible in history but do not contribute to those totals. Internal use is explicitly labeled as inventory-only and does not affect the daily shop record.
 
 ## Current deployment architecture
 GitHub Pages remains the frontend/PWA.
@@ -142,6 +167,9 @@ Core tables:
 
 Important database safety:
 - `days_unique_date_idx` is a unique index on `days(date)`.
+- `products.archived` / `products.archived_at` retain product archive state.
+- `inventory_movements.canceled` / `inventory_movements.canceled_at` retain non-destructive movement cancellation state.
+- `cancel_inventory_movement(text)` atomically cancels a movement and corrects product stock/current cost.
 
 Access function:
 - `verify_site_password(text)` is callable only by trusted service-role code.
@@ -165,7 +193,7 @@ Main frontend files:
 
 The dashboard, day records, and CSV export intentionally contain no product-consumption accounting. Product consumption remains only in inventory movements/history.
 
-`inventory-movements.js` creates the dedicated filtered product-movement view and also applies the shared `DD/MM/YYYY` user-facing date adapter to static and dynamically created date fields.
+`inventory-movements.js` creates the dedicated filtered product-movement view, applies the shared `DD/MM/YYYY` user-facing date adapter, adds non-destructive movement cancellation, and adds active/archived product search/filter controls.
 
 `cloud.js` contains the remembered site-password gate, duplicate-day guard, and record-level background Supabase synchronization. It contains no one-time migration gate.
 
