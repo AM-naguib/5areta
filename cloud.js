@@ -3,9 +3,62 @@
   const SUPABASE_KEY = 'sb_publishable_mJ1inYR92B_lks91qFqXOw_hFGnExBD';
   const STORAGE_KEY = '5areta-shop-v1';
   const PENDING_KEY = '5areta-cloud-pending-v1';
-  const OLD_BASE_KEY = '5areta-cloud-base-v1';
+  const BASE_KEY = '5areta-cloud-base-v2';
+  const LEGACY_BASE_KEY = '5areta-cloud-base-v1';
   const SITE_UNLOCKED_KEY = '5areta-site-unlocked-v1';
   const POLL_MS = 20000;
+
+  function installDayDuplicateGuard() {
+    document.addEventListener('submit', async (event) => {
+      if (event.target?.id !== 'dayForm') return;
+      if (typeof state === 'undefined' || !Array.isArray(state.days)) return;
+
+      const editingId = document.getElementById('editingDayId')?.value || '';
+      const date = document.getElementById('dayDate')?.value || '';
+      if (!date) return;
+
+      const duplicate = state.days.find((day) => day.date === date && day.id !== editingId);
+      if (!duplicate) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const ok = typeof confirmAction === 'function'
+        ? await confirmAction(
+            'اليوم متسجل بالفعل',
+            `في تسجيل موجود بالفعل بتاريخ ${date}. اضغط تأكيد عشان نفتح اليوم الموجود للتعديل بدل ما نعمل نسخة مكررة.`
+          )
+        : false;
+
+      if (!ok) return;
+
+      const setValue = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.value = value ?? '';
+      };
+
+      setValue('editingDayId', duplicate.id);
+      setValue('dayDate', duplicate.date);
+      setValue('customers', duplicate.customers);
+      setValue('revenue', duplicate.revenue);
+      setValue('operating', duplicate.operating);
+      setValue('worker', duplicate.worker);
+      setValue('personal', duplicate.personal);
+      setValue('dayNotes', duplicate.notes || '');
+
+      const cancel = document.getElementById('cancelEditBtn');
+      const save = document.getElementById('saveDayBtn');
+      if (cancel) cancel.hidden = false;
+      if (save) save.textContent = 'حفظ التعديل';
+
+      if (typeof updateLiveCalc === 'function') updateLiveCalc();
+      if (typeof switchView === 'function') switchView('dashboard');
+      document.querySelector('.quick-entry')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof showToast === 'function') showToast('فتحت اليوم الموجود للتعديل');
+    }, true);
+  }
+
+  installDayDuplicateGuard();
 
   if (!window.supabase?.createClient) {
     console.error('Supabase client failed to load');
@@ -26,6 +79,8 @@
   let refreshing = false;
   let syncTimer = null;
   let pollTimer = null;
+  let lastBase = null;
+  let localRevision = 0;
 
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const n = (value) => Number(value || 0);
@@ -34,6 +89,37 @@
   function notify(message) {
     if (typeof window.showToast === 'function') window.showToast(message);
     else console.info(message);
+  }
+
+  function safeParse(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key) || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function same(a, b) {
+    if (a === b) return true;
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
+  }
+
+  function mapById(items) {
+    return new Map((items || []).map((item) => [String(item.id), item]));
+  }
+
+  function readBase() {
+    return safeParse(BASE_KEY) || safeParse(LEGACY_BASE_KEY);
+  }
+
+  function persistBase(base) {
+    lastBase = clone(base);
+    localStorage.setItem(BASE_KEY, JSON.stringify(lastBase));
+    localStorage.removeItem(LEGACY_BASE_KEY);
   }
 
   function removeSiteGate() {
@@ -80,7 +166,7 @@
     return gate;
   }
 
-  async function requestPassword(session) {
+  async function requestPassword() {
     showSiteGate();
 
     return new Promise((resolve) => {
@@ -174,7 +260,7 @@
       return { allowed: true, cloudReady: true };
     }
 
-    const unlocked = await requestPassword(session);
+    const unlocked = await requestPassword();
     return { allowed: !!unlocked, cloudReady: !!unlocked };
   }
 
@@ -278,72 +364,134 @@
     };
   }
 
-  async function replaceTable(table, rows) {
-    if (rows.length) {
-      const { error } = await client.from(table).upsert(rows, { onConflict: 'id' });
-      if (error) throw error;
+  function diffCollection(current, base, allowDeletes = true) {
+    const currentMap = mapById(current);
+    const baseMap = mapById(base);
+    const upserts = [];
+
+    for (const [id, item] of currentMap) {
+      if (!same(item, baseMap.get(id))) upserts.push(item);
     }
 
-    const { data: existing, error: readError } = await client.from(table).select('id');
-    if (readError) throw readError;
-
-    const wanted = new Set(rows.map((row) => String(row.id)));
-    const remove = (existing || [])
-      .map((row) => String(row.id))
-      .filter((id) => !wanted.has(id));
-
-    if (remove.length) {
-      const { error } = await client.from(table).delete().in('id', remove);
-      if (error) throw error;
+    const deletes = [];
+    if (allowDeletes) {
+      for (const id of baseMap.keys()) {
+        if (!currentMap.has(id)) deletes.push(id);
+      }
     }
+
+    return { upserts, deletes };
   }
 
-  async function syncSnapshot(input) {
-    if (syncing || !window.__5ARETA_CLOUD_ACTIVE__ || !navigator.onLine) return false;
-    syncing = true;
+  function buildDelta(snapshot, base, allowDeletes = true) {
+    const previous = base || {
+      settings: {},
+      days: [],
+      withdrawals: [],
+      products: [],
+      inventoryMovements: []
+    };
 
-    const snapshot = clone(input || state);
+    return {
+      settingsChanged: !same(snapshot.settings || {}, previous.settings || {}),
+      days: diffCollection(snapshot.days, previous.days, allowDeletes && !!base),
+      withdrawals: diffCollection(snapshot.withdrawals, previous.withdrawals, allowDeletes && !!base),
+      products: diffCollection(snapshot.products, previous.products, allowDeletes && !!base),
+      inventoryMovements: diffCollection(
+        snapshot.inventoryMovements,
+        previous.inventoryMovements,
+        allowDeletes && !!base
+      )
+    };
+  }
 
-    try {
-      const preparedProducts = [];
-      for (const product of snapshot.products || []) {
-        preparedProducts.push(await prepareProduct(product));
-      }
-      snapshot.products = preparedProducts;
+  function hasDelta(delta) {
+    return delta.settingsChanged ||
+      delta.days.upserts.length || delta.days.deletes.length ||
+      delta.withdrawals.upserts.length || delta.withdrawals.deletes.length ||
+      delta.products.upserts.length || delta.products.deletes.length ||
+      delta.inventoryMovements.upserts.length || delta.inventoryMovements.deletes.length;
+  }
 
-      const { error: settingsError } = await client.from('app_settings').upsert({
+  async function upsertRows(table, rows) {
+    if (!rows.length) return;
+    const { error } = await client.from(table).upsert(rows, { onConflict: 'id' });
+    if (error) throw error;
+  }
+
+  async function deleteRows(table, ids) {
+    if (!ids.length) return;
+    const { error } = await client.from(table).delete().in('id', ids);
+    if (error) throw error;
+  }
+
+  async function applyDelta(delta, snapshot) {
+    const working = clone(snapshot);
+
+    if (delta.settingsChanged) {
+      const { error } = await client.from('app_settings').upsert({
         id: 1,
-        opening_vault: n(snapshot.settings?.openingVault),
+        opening_vault: n(working.settings?.openingVault),
         low_stock_threshold: 3,
         updated_at: nowIso()
       });
-      if (settingsError) throw settingsError;
-
-      await replaceTable('products', (snapshot.products || []).map(productToDb));
-      await replaceTable('days', (snapshot.days || []).map(dayToDb));
-      await replaceTable('withdrawals', (snapshot.withdrawals || []).map(withdrawalToDb));
-      await replaceTable('inventory_movements', (snapshot.inventoryMovements || []).map(movementToDb));
-
-      state = clone(snapshot);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      localStorage.removeItem(PENDING_KEY);
-      renderAll();
-      return true;
-    } catch (error) {
-      console.error('Cloud save failed', error);
-      notify('اتحفظ على الجهاز، والسحابة هتحاول تاني لما الاتصال يستقر');
-      return false;
-    } finally {
-      syncing = false;
+      if (error) throw error;
     }
+
+    const preparedProducts = [];
+    for (const product of delta.products.upserts) {
+      preparedProducts.push(await prepareProduct(product));
+    }
+
+    if (preparedProducts.length) {
+      const preparedById = mapById(preparedProducts);
+      working.products = (working.products || []).map((product) =>
+        preparedById.get(String(product.id)) || product
+      );
+      await upsertRows('products', preparedProducts.map(productToDb));
+    }
+
+    await upsertRows('days', delta.days.upserts.map(dayToDb));
+    await upsertRows('withdrawals', delta.withdrawals.upserts.map(withdrawalToDb));
+    await upsertRows('inventory_movements', delta.inventoryMovements.upserts.map(movementToDb));
+
+    await deleteRows('inventory_movements', delta.inventoryMovements.deletes);
+    await deleteRows('days', delta.days.deletes);
+    await deleteRows('withdrawals', delta.withdrawals.deletes);
+    await deleteRows('products', delta.products.deletes);
+
+    return working;
   }
 
-  window.cloudSaveState = (nextState) => {
-    const snapshot = clone(nextState || state);
-    try { localStorage.setItem(PENDING_KEY, JSON.stringify(snapshot)); } catch {}
-    clearTimeout(syncTimer);
-    if (navigator.onLine) syncTimer = setTimeout(() => syncSnapshot(snapshot), 120);
-  };
+  function applyLocalChanges(remote, local, base) {
+    const result = clone(remote);
+    const previous = base || null;
+
+    if (!previous || !same(local.settings || {}, previous.settings || {})) {
+      result.settings = clone(local.settings || result.settings);
+    }
+
+    for (const key of ['days', 'withdrawals', 'products', 'inventoryMovements']) {
+      const resultMap = mapById(result[key]);
+      const localMap = mapById(local[key]);
+      const baseMap = mapById(previous?.[key]);
+
+      if (!previous) {
+        for (const [id, item] of localMap) resultMap.set(id, clone(item));
+      } else {
+        for (const [id, item] of localMap) {
+          if (!same(item, baseMap.get(id))) resultMap.set(id, clone(item));
+        }
+        for (const id of baseMap.keys()) {
+          if (!localMap.has(id)) resultMap.delete(id);
+        }
+      }
+
+      result[key] = [...resultMap.values()];
+    }
+
+    return result;
+  }
 
   async function fetchCloudState() {
     const [settingsRes, daysRes, withdrawalsRes, productsRes, movementsRes] = await Promise.all([
@@ -413,6 +561,59 @@
     };
   }
 
+  async function syncSnapshot(input, baseOverride = lastBase, options = {}) {
+    if (syncing || !window.__5ARETA_CLOUD_ACTIVE__ || !navigator.onLine) return false;
+    syncing = true;
+
+    const startedRevision = localRevision;
+    const snapshot = clone(input || state);
+    const base = baseOverride ? clone(baseOverride) : null;
+    const allowDeletes = options.allowDeletes !== false;
+
+    try {
+      const delta = buildDelta(snapshot, base, allowDeletes);
+
+      if (hasDelta(delta)) {
+        await applyDelta(delta, snapshot);
+      }
+
+      const remote = await fetchCloudState();
+      persistBase(remote);
+
+      if (localRevision === startedRevision) {
+        state = remote;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.removeItem(PENDING_KEY);
+        renderAll();
+      } else {
+        const latest = safeParse(PENDING_KEY) || clone(state);
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => syncSnapshot(latest, lastBase), 0);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Cloud save failed', error);
+      notify('اتحفظ على الجهاز، والسحابة هتحاول تاني لما الاتصال يستقر');
+      return false;
+    } finally {
+      syncing = false;
+    }
+  }
+
+  window.cloudSaveState = (nextState) => {
+    const snapshot = clone(nextState || state);
+    localRevision += 1;
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(snapshot));
+    } catch {}
+
+    clearTimeout(syncTimer);
+    if (navigator.onLine) {
+      syncTimer = setTimeout(() => syncSnapshot(snapshot, lastBase), 120);
+    }
+  };
+
   async function refreshFromCloud() {
     if (refreshing || syncing || !window.__5ARETA_CLOUD_ACTIVE__ || !navigator.onLine) return;
     if (localStorage.getItem(PENDING_KEY)) return;
@@ -420,6 +621,7 @@
     refreshing = true;
     try {
       const remote = await fetchCloudState();
+      persistBase(remote);
       state = remote;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
@@ -430,27 +632,58 @@
     }
   }
 
+  async function syncPendingAgainstLatestRemote() {
+    const pending = safeParse(PENDING_KEY);
+    if (!pending || !navigator.onLine) {
+      if (!pending) await refreshFromCloud();
+      return;
+    }
+
+    const previousBase = lastBase || readBase();
+    const remote = await fetchCloudState();
+    const merged = applyLocalChanges(remote, pending, previousBase);
+
+    persistBase(remote);
+    state = merged;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderAll();
+
+    await syncSnapshot(merged, remote, { allowDeletes: !!previousBase });
+  }
+
   async function startCloudWork() {
     window.__5ARETA_CLOUD_ACTIVE__ = true;
-    localStorage.removeItem(OLD_BASE_KEY);
 
-    let pending = null;
-    try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch {}
+    const previousBase = readBase();
+    lastBase = previousBase ? clone(previousBase) : null;
+    const pending = safeParse(PENDING_KEY);
 
-    if (pending) {
+    if (navigator.onLine) {
+      const remote = await fetchCloudState();
+
+      if (pending) {
+        const merged = applyLocalChanges(remote, pending, previousBase);
+        persistBase(remote);
+        state = merged;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+        await syncSnapshot(merged, remote, { allowDeletes: !!previousBase });
+      } else {
+        persistBase(remote);
+        state = remote;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+      }
+    } else if (pending) {
       state = pending;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
-      if (navigator.onLine) await syncSnapshot(pending);
-    } else if (navigator.onLine) {
-      await refreshFromCloud();
     }
 
     window.addEventListener('online', () => {
-      let queued = null;
-      try { queued = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch {}
-      if (queued) syncSnapshot(queued);
-      else refreshFromCloud();
+      syncPendingAgainstLatestRemote().catch((error) => {
+        console.warn('Online sync failed', error);
+      });
     });
 
     if (!pollTimer) pollTimer = setInterval(refreshFromCloud, POLL_MS);
