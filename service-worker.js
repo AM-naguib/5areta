@@ -1,4 +1,4 @@
-const CACHE = '5areta-v11-ddmmyyyy-dates';
+const CACHE = '5areta-v12-inventory-corrections-archive';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './inventory-movements.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
