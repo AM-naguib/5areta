@@ -1,4 +1,4 @@
-const CACHE = '5areta-v9-product-movements';
+const CACHE = '5areta-v10-safe-sync-day-guard';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './inventory.js', './inventory-movements.js', './cloud.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
