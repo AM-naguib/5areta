@@ -32,6 +32,17 @@ Confirmed behavior:
 - Editing a day cannot change its date onto another already-existing day.
 - Supabase also enforces this rule with a unique index on `days.date`, so duplicate dates are blocked at the database level as a second safety layer.
 
+## UI date format
+All user-facing full dates use numeric day/month/year format: `DD/MM/YYYY`.
+
+Examples:
+- 3 September 2026 is shown as `03/09/2026`.
+- Date fields accept day/month/year input and normalize valid dates to two-digit day and month.
+- Arabic/Persian digit input is accepted and normalized.
+- Internal stored dates remain ISO `YYYY-MM-DD` so sorting, filters, Supabase, and synchronization remain stable.
+- Product-movement custom date filters use the same `DD/MM/YYYY` display format.
+- Daily CSV export converts stored ISO dates to `DD/MM/YYYY` for the user-facing file.
+
 ## Inventory model
 Inventory is tracked in whole pieces only.
 
@@ -154,7 +165,7 @@ Main frontend files:
 
 The dashboard, day records, and CSV export intentionally contain no product-consumption accounting. Product consumption remains only in inventory movements/history.
 
-`inventory-movements.js` creates the dedicated filtered product-movement view and its inventory-header entry point.
+`inventory-movements.js` creates the dedicated filtered product-movement view and also applies the shared `DD/MM/YYYY` user-facing date adapter to static and dynamically created date fields.
 
 `cloud.js` contains the remembered site-password gate, duplicate-day guard, and record-level background Supabase synchronization. It contains no one-time migration gate.
 
