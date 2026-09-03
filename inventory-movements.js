@@ -100,6 +100,7 @@
   let searchText = '';
   let cloudFlagsLoaded = false;
   let flushingFlags = false;
+  let sheetDecorating = false;
   const cancelingIds = new Set();
 
   function readJson(key, fallback) {
@@ -380,42 +381,51 @@
   }
 
   function decorateProductSheet() {
-    applyFlagsToState();
-    const sheet = $('productSheet');
-    const body = $('productSheetBody');
-    if (!sheet || sheet.hidden || !body) return;
-    const product = productById(body.querySelector('[data-product-id]')?.dataset.productId);
-    if (!product) return;
-    const detailsActions = body.querySelector('.detail-actions');
-    if (detailsActions) {
-      let archiveButton = body.querySelector('[data-archive-product], [data-restore-product]');
-      if (!archiveButton) { archiveButton = document.createElement('button'); archiveButton.type = 'button'; detailsActions.appendChild(archiveButton); }
-      archiveButton.className = product.archived ? 'btn secondary' : 'btn danger';
-      archiveButton.textContent = product.archived ? 'إرجاع للمخزن' : 'أرشفة المنتج';
-      if (product.archived) {
-        archiveButton.dataset.restoreProduct = product.id; delete archiveButton.dataset.archiveProduct;
-        detailsActions.querySelector('[data-product-action="restock"]')?.setAttribute('hidden', '');
-      } else { archiveButton.dataset.archiveProduct = product.id; delete archiveButton.dataset.restoreProduct; }
-      if (product.archived && !body.querySelector('.archived-product-note')) {
-        const note = document.createElement('div'); note.className = 'inline-note archived-product-note'; note.textContent = 'المنتج مؤرشف: تاريخه وحركاته محفوظين، لكنه مخفي من قائمة المخزن الأساسية.'; detailsActions.before(note);
+    if (sheetDecorating) return;
+    sheetDecorating = true;
+    try {
+      applyFlagsToState();
+      const sheet = $('productSheet');
+      const body = $('productSheetBody');
+      if (!sheet || sheet.hidden || !body) return;
+      const product = productById(body.querySelector('[data-product-id]')?.dataset.productId);
+      if (!product) return;
+      const detailsActions = body.querySelector('.detail-actions');
+      if (detailsActions) {
+        let archiveButton = body.querySelector('[data-archive-product], [data-restore-product]');
+        if (!archiveButton) { archiveButton = document.createElement('button'); archiveButton.type = 'button'; detailsActions.appendChild(archiveButton); }
+        archiveButton.className = product.archived ? 'btn secondary' : 'btn danger';
+        archiveButton.textContent = product.archived ? 'إرجاع للمخزن' : 'أرشفة المنتج';
+        if (product.archived) {
+          archiveButton.dataset.restoreProduct = product.id; delete archiveButton.dataset.archiveProduct;
+          detailsActions.querySelector('[data-product-action="restock"]')?.setAttribute('hidden', '');
+        } else { archiveButton.dataset.archiveProduct = product.id; delete archiveButton.dataset.restoreProduct; }
+        if (product.archived && !body.querySelector('.archived-product-note')) {
+          const note = document.createElement('div'); note.className = 'inline-note archived-product-note'; note.textContent = 'المنتج مؤرشف: تاريخه وحركاته محفوظين، لكنه مخفي من قائمة المخزن الأساسية.'; detailsActions.before(note);
+        }
       }
+      const sales = activeSalesMetrics(product.id);
+      body.querySelectorAll('.detail-stat').forEach((stat) => {
+        const label = stat.querySelector('span')?.textContent?.trim(); const value = stat.querySelector('strong'); if (!value) return;
+        if (label === 'كاش مبيعات المنتج') value.textContent = money.format(sales.cash);
+        if (label === 'إجمالي ربح المنتج') { value.textContent = money.format(sales.profit); setSignedClass(value, sales.profit); }
+        if (label === 'القطع المباعة') value.textContent = numberFmt.format(sales.quantity);
+      });
+      const movements = sortedProductMovements(product.id);
+      body.querySelectorAll('.movement-list .movement-item').forEach((item, index) => {
+        const movement = movements[index]; if (!movement) return;
+        item.classList.toggle('movement-item-canceled', isCanceled(movement));
+        const wantedState = isCanceled(movement) ? 'canceled' : 'active';
+        const existing = item.querySelector('.movement-cancel-control');
+        if (existing?.dataset.state === wantedState) return;
+        existing?.remove();
+        const control = document.createElement('div'); control.className = 'movement-cancel-control'; control.dataset.state = wantedState;
+        control.innerHTML = isCanceled(movement) ? '<span class="im-canceled-badge">ملغية</span>' : `<button class="mini-btn danger-text" type="button" data-cancel-movement="${escapeHtml(movement.id)}">إلغاء الحركة</button>`;
+        item.appendChild(control);
+      });
+    } finally {
+      setTimeout(() => { sheetDecorating = false; }, 0);
     }
-    const sales = activeSalesMetrics(product.id);
-    body.querySelectorAll('.detail-stat').forEach((stat) => {
-      const label = stat.querySelector('span')?.textContent?.trim(); const value = stat.querySelector('strong'); if (!value) return;
-      if (label === 'كاش مبيعات المنتج') value.textContent = money.format(sales.cash);
-      if (label === 'إجمالي ربح المنتج') { value.textContent = money.format(sales.profit); setSignedClass(value, sales.profit); }
-      if (label === 'القطع المباعة') value.textContent = numberFmt.format(sales.quantity);
-    });
-    const movements = sortedProductMovements(product.id);
-    body.querySelectorAll('.movement-list .movement-item').forEach((item, index) => {
-      const movement = movements[index]; if (!movement) return;
-      item.classList.toggle('movement-item-canceled', isCanceled(movement));
-      item.querySelector('.movement-cancel-control')?.remove();
-      const control = document.createElement('div'); control.className = 'movement-cancel-control';
-      control.innerHTML = isCanceled(movement) ? '<span class="im-canceled-badge">ملغية</span>' : `<button class="mini-btn danger-text" type="button" data-cancel-movement="${escapeHtml(movement.id)}">إلغاء الحركة</button>`;
-      item.appendChild(control);
-    });
   }
 
   function closeProductSheet() {
