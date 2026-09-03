@@ -128,18 +128,17 @@ Status: Partially superseded by D-037, D-038, and D-039.
 Supabase Database, private Storage, RLS, and browser cloud integration remain. The old one-time migration mechanism does not.
 
 ### D-037 — Simplified single-user local cache + background Supabase sync
-Status: Implemented
+Status: Refined by D-042
 
 The app is optimized for one owner and simplicity:
 - No one-time data-migration/loading workflow.
 - Save locally first so normal work is resilient to temporary Supabase availability.
-- When the current browser session is authorized, sync the same state to Supabase automatically in the background.
+- When the current browser session is authorized, sync automatically to Supabase in the background.
 - Keep one pending local snapshot when cloud writes cannot complete; retry when internet returns.
 - When there is no pending local change, refresh from Supabase in the background.
 - Do not run a one-time local-to-cloud migration or delete the local cache after sync.
-- The simple sync may replace the shared table snapshot, which is acceptable for the intended single-owner workflow.
 
-This supersedes D-030B and D-031 and simplifies the migration/offline portions of D-036.
+The earlier full-table snapshot replacement behavior is superseded by D-042.
 
 ### D-038 — Remove the shop PIN; keep backend device approval
 Status: Superseded by D-039.
@@ -166,7 +165,7 @@ This replaces the manual-new-device approval model in D-038 while preserving RLS
 ### D-040 — Daily shop finance is fully independent from products
 Status: Implemented
 
-The daily registration/s سجل المحل must have no accounting dependency on products, including internal product consumption.
+The daily registration / سجل المحل has no accounting dependency on products, including internal product consumption.
 
 Rules:
 - Daily shop profit = service revenue - ordinary operating expenses - worker payments.
@@ -193,14 +192,41 @@ Date filters:
 
 The selected period also shows summary counts for total movements, purchased units, sold units, and internally used units. Internal-use cards explicitly state that they belong to inventory only and do not affect the daily shop-finance record.
 
+### D-042 — Record-level cloud synchronization safety
+Status: Implemented
+
+Background synchronization must not replace whole business tables from a possibly stale browser snapshot.
+
+Rules:
+- Keep a last-known cloud base snapshot locally.
+- Compare the current local state with that base to determine which individual records were added, edited, or deleted.
+- Upsert only changed records and delete only records that were explicitly removed relative to the known base.
+- A stale local snapshot must not delete unrelated rows that appeared in Supabase from another newer cloud state.
+- After offline work, fetch the latest Supabase state first, reapply only the local changes/deletions on top of it, then synchronize those differences.
+- If the same record changed both remotely and locally, the existing last-write-wins rule remains for that record.
+- The pending local snapshot remains an offline recovery mechanism, but it is used to calculate record-level differences rather than replace entire tables.
+
+This refines D-037 without adding any manual sync UI.
+
+### D-043 — One daily-finance record per calendar date
+Status: Implemented
+
+The shop should never contain two daily-finance records for the same date.
+
+Rules:
+- When saving a new day, if that date already exists, block the duplicate.
+- Offer to open the existing day for editing instead.
+- When editing an existing day, changing its date to another already-used date is also blocked.
+- Supabase enforces the same rule with the unique index `days_unique_date_idx` on `days(date)` as a backend safety layer.
+
 ## Current architecture summary
 - Frontend/PWA: GitHub Pages.
 - Shared cloud data: Supabase Database.
 - Product images: private Supabase Storage.
 - Access control: remembered site password for new browser sessions + anonymous Supabase Auth + `authorized_devices` + RLS.
 - Device working copy: localStorage for immediate saves/offline use after the site has been unlocked.
-- Sync: automatic background synchronization; no migration gate and no manual sync button.
-- Daily finance: fully independent from inventory/products.
+- Sync: automatic record-level background synchronization; no migration gate and no manual sync button.
+- Daily finance: fully independent from inventory/products and unique by calendar date.
 - Inventory movements: dedicated filtered history page inside the inventory module.
 
 ## Open decisions
